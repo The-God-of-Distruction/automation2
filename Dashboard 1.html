@@ -1,0 +1,2078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberShield — Training Automation Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --bg2: #0f1117;
+    --bg3: #161a24;
+    --bg4: #1d2232;
+    --border: #252d42;
+    --border2: #2e3854;
+    --text: #e8ecf4;
+    --text2: #9ba3bb;
+    --text3: #5c6480;
+    --accent: #4f8ef7;
+    --accent2: #7c5cfc;
+    --green: #22d3a0;
+    --yellow: #f5c842;
+    --red: #f7566a;
+    --orange: #f79244;
+    --card-glow: 0 0 40px rgba(79,142,247,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,12,16,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 58px;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 18px;
+    display: flex; align-items: center; gap: 10px;
+    letter-spacing: -0.3px;
+  }
+  .logo-icon {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .header-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--text3);
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 10px;
+  }
+  #clock {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: var(--accent);
+  }
+  .btn-process-all {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; color: #fff;
+    font-family: 'Syne', sans-serif; font-weight: 600;
+    font-size: 12px; padding: 7px 18px;
+    border-radius: 8px; cursor: pointer;
+    transition: opacity .2s, transform .15s;
+    letter-spacing: 0.3px;
+  }
+  .btn-process-all:hover { opacity: .88; transform: translateY(-1px); }
+
+  /* MAIN */
+  .main { padding: 28px 32px; max-width: 1600px; margin: 0 auto; }
+
+  /* KPI */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px; margin-bottom: 28px;
+  }
+  @media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px)  { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    position: relative; overflow: hidden;
+    transition: border-color .2s, box-shadow .2s;
+    box-shadow: var(--card-glow);
+  }
+  .kpi-card:hover { border-color: var(--border2); box-shadow: 0 0 30px rgba(79,142,247,0.12); }
+  .kpi-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0; transition: opacity .2s;
+  }
+  .kpi-card:hover::before { opacity: 1; }
+  .kpi-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 500; margin-bottom: 8px; }
+  .kpi-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px; font-weight: 800;
+    line-height: 1; letter-spacing: -1px;
+  }
+  .kpi-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .kpi-accent { color: var(--accent); }
+  .kpi-green { color: var(--green); }
+  .kpi-red { color: var(--red); }
+  .kpi-yellow { color: var(--yellow); }
+  .kpi-purple { color: var(--accent2); }
+  .kpi-orange { color: var(--orange); }
+
+  /* SECTION TABS */
+  .tabs-row {
+    display: flex; gap: 6px; margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    font-family: 'Inter', sans-serif; font-weight: 500;
+    font-size: 12px; padding: 7px 16px;
+    border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg2); color: var(--text2);
+    cursor: pointer; transition: all .15s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tab-btn.active {
+    background: var(--accent); border-color: var(--accent);
+    color: #fff; font-weight: 600;
+  }
+
+  /* SECTION PANELS */
+  .section-panel { display: none; }
+  .section-panel.active { display: block; }
+
+  /* SECTION CARD */
+  .section-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--card-glow);
+  }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap; gap: 12px;
+  }
+  .section-title-block { display: flex; align-items: center; gap: 12px; }
+  .section-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 15px;
+    letter-spacing: -0.2px;
+  }
+  .section-desc { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .section-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .date-label { font-size: 11px; color: var(--text3); white-space: nowrap; }
+  .date-input {
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text); border-radius: 8px;
+    padding: 6px 10px; font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .date-input:focus { border-color: var(--accent); }
+
+  /* METRICS ROW */
+  .metrics-row {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background: var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .metric-box {
+    background: var(--bg2);
+    padding: 14px 20px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .metric-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text3); font-weight: 500; }
+  .metric-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; line-height: 1; }
+  .progress-bar-wrap { margin-top: 6px; }
+  .progress-bar-bg {
+    height: 4px; background: var(--bg4); border-radius: 2px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 2px;
+    transition: width .6s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* UPLOAD ZONE */
+  .uploads-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  @media (max-width: 800px) { .uploads-grid { grid-template-columns: 1fr; } }
+
+  .upload-zone {
+    border: 2px dashed var(--border2);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative; overflow: hidden;
+    background: var(--bg3);
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(79,142,247,0.05);
+  }
+  .upload-zone.has-file { border-color: var(--green); background: rgba(34,211,160,0.04); }
+  .upload-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-icon { font-size: 22px; margin-bottom: 6px; }
+  .upload-title { font-weight: 600; font-size: 12px; color: var(--text); margin-bottom: 3px; }
+  .upload-hint { font-size: 11px; color: var(--text3); }
+  .upload-filename {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--green);
+    margin-top: 6px; word-break: break-all;
+  }
+
+  /* ACTION ROW */
+  .action-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap; gap: 10px;
+  }
+  .last-calc { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+  .btns-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .btn {
+    border: none; border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-weight: 600;
+    font-size: 12px; padding: 8px 16px;
+    cursor: pointer; transition: all .15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #3d7de8; transform: translateY(-1px); }
+  .btn-success { background: var(--green); color: #052920; }
+  .btn-success:hover { opacity: .88; transform: translateY(-1px); }
+  .btn-ghost {
+    background: var(--bg3); color: var(--text2);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 12px;
+  }
+  thead th {
+    background: var(--bg3);
+    color: var(--text3); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    font-size: 10px;
+    padding: 10px 16px;
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .1s;
+  }
+  tbody tr:hover { background: var(--bg3); }
+  tbody tr:last-child { border-bottom: none; }
+  td {
+    padding: 9px 16px;
+    color: var(--text2);
+    white-space: nowrap;
+    max-width: 220px; overflow: hidden; text-overflow: ellipsis;
+  }
+  td.mono { font-family: 'DM Mono', monospace; font-size: 11px; }
+  .badge {
+    display: inline-flex; align-items: center;
+    border-radius: 5px; padding: 2px 8px;
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge-green { background: rgba(34,211,160,.14); color: var(--green); }
+  .badge-red   { background: rgba(247,86,106,.14);  color: var(--red); }
+  .badge-yellow{ background: rgba(245,200,66,.14);  color: var(--yellow); }
+  .badge-gray  { background: rgba(92,100,128,.18);  color: var(--text3); }
+  .badge-blue  { background: rgba(79,142,247,.14);  color: var(--accent); }
+
+  .empty-state {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--text3);
+  }
+  .empty-icon { font-size: 36px; margin-bottom: 10px; }
+  .empty-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; color: var(--text2); margin-bottom: 4px; }
+
+  /* TOAST */
+  #toast-container {
+    position: fixed; bottom: 24px; right: 24px;
+    z-index: 9999;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .toast {
+    min-width: 280px; padding: 12px 18px;
+    border-radius: 10px; font-size: 13px; font-weight: 500;
+    animation: slideUp .3s ease; display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  }
+  .toast-success { background: #0e2921; border: 1px solid var(--green); color: var(--green); }
+  .toast-error   { background: #250c10; border: 1px solid var(--red);   color: var(--red); }
+  .toast-info    { background: #0c1a30; border: 1px solid var(--accent); color: var(--accent); }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* LOADER */
+  .spinner {
+    display: inline-block; width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,.25);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* NEW JOINER SHEET TABS */
+  .sheet-tabs { display: flex; gap: 4px; padding: 12px 24px 0; border-bottom: 1px solid var(--border); }
+  .sheet-tab {
+    font-size: 12px; font-weight: 500; padding: 6px 14px;
+    border-radius: 6px 6px 0 0;
+    border: 1px solid transparent; border-bottom: none;
+    cursor: pointer; color: var(--text3);
+    background: transparent; transition: all .15s;
+  }
+  .sheet-tab.active {
+    background: var(--bg3); border-color: var(--border);
+    color: var(--text); border-bottom-color: var(--bg3);
+  }
+  .sheet-content { display: none; }
+  .sheet-content.active { display: block; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* Section colors */
+  .dot-blue   { background: var(--accent); }
+  .dot-purple { background: var(--accent2); }
+  .dot-green  { background: var(--green); }
+  .dot-yellow { background: var(--yellow); }
+  .dot-red    { background: var(--red); }
+  .dot-orange { background: var(--orange); }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 0 24px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">🛡</div>
+    CyberShield
+    <span style="font-size:12px;color:var(--text3);font-weight:400;font-family:Inter">Training Dashboard</span>
+  </div>
+  <div class="header-right">
+    <span class="header-badge">ABI — Security Automation</span>
+    <span id="clock">--:--:--</span>
+    <button class="btn-process-all" onclick="processAll()">⚡ Process All Sections</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Users</div>
+      <div class="kpi-val kpi-accent" id="kpi-total">—</div>
+      <div class="kpi-sub">Across all sections</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Completed</div>
+      <div class="kpi-val kpi-green" id="kpi-completed">—</div>
+      <div class="kpi-sub">Trainings finished</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Pending</div>
+      <div class="kpi-val kpi-red" id="kpi-pending">—</div>
+      <div class="kpi-sub">Awaiting completion</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Sections Active</div>
+      <div class="kpi-val kpi-yellow" id="kpi-sections">6</div>
+      <div class="kpi-sub">Training modules</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Files Uploaded</div>
+      <div class="kpi-val kpi-purple" id="kpi-files">0</div>
+      <div class="kpi-sub">This session</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Last Processed</div>
+      <div class="kpi-val kpi-orange" style="font-size:16px;padding-top:6px" id="kpi-lastrun">Never</div>
+      <div class="kpi-sub">Calculation time</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-row">
+    <button class="tab-btn active" onclick="switchTab('appSec')">🔒 App Security</button>
+    <button class="tab-btn" onclick="switchTab('growth')">🌱 Growth Group</button>
+    <button class="tab-btn" onclick="switchTab('newJoiner')">🆕 New Joiner</button>
+    <button class="tab-btn" onclick="switchTab('bsc')">🏢 BSC</button>
+    <button class="tab-btn" onclick="switchTab('phishingNormal')">🎣 Phishing Normal</button>
+    <button class="tab-btn" onclick="switchTab('band4')">⭐ Band 4+</button>
+  </div>
+
+  <!-- ============================================================
+       SECTION: APPLICATION SECURITY
+  ============================================================ -->
+  <div class="section-panel active" id="panel-appSec">
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title-block">
+          <div class="section-dot dot-blue"></div>
+          <div>
+            <div class="section-title">Application Security</div>
+            <div class="section-desc">Introduction to Application Security #ABI — Training status export only (no userbase)</div>
+          </div>
+        </div>
+        <div class="section-controls">
+          <span class="date-label">Assignment Date:</span>
+          <input type="date" class="date-input" id="date-appSec" value="">
+        </div>
+      </div>
+
+      <div class="metrics-row">
+        <div class="metric-box">
+          <div class="metric-label">Total Users</div>
+          <div class="metric-val kpi-accent" id="m-appSec-total">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Completed</div>
+          <div class="metric-val kpi-green" id="m-appSec-completed">—</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="pb-appSec" style="width:0%;background:var(--green)"></div></div>
+          </div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Pending</div>
+          <div class="metric-val kpi-red" id="m-appSec-pending">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Last Calculated</div>
+          <div class="metric-val" style="font-size:12px;padding-top:4px;font-family:'DM Mono',monospace;color:var(--text3)" id="m-appSec-calc">Never</div>
+        </div>
+      </div>
+
+      <div class="uploads-grid" style="grid-template-columns:1fr">
+        <div class="upload-zone" id="uz-appSec-tool" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'appSec','tool')">
+          <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'appSec','tool')">
+          <div class="upload-icon">📊</div>
+          <div class="upload-title">Training status / tool export</div>
+          <div class="upload-hint">LMS or reporting export with Employee ID, email, transcript status, dates</div>
+          <div class="upload-filename" id="fn-appSec-tool"></div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <div class="last-calc" id="lc-appSec">No calculation yet</div>
+        <div class="btns-group">
+          <button class="btn btn-primary" id="btn-calc-appSec" onclick="calcSection('appSec')">▶ Calculate</button>
+          <button class="btn btn-success" id="btn-dl-appSec" onclick="downloadSection('appSec')" disabled>⬇ Download Excel</button>
+          <button class="btn btn-ghost" id="btn-dl-pending-appSec" onclick="downloadPendingSection('appSec')" disabled>⚠ Download Pending Users</button>
+          <button class="btn btn-ghost" onclick="clearSection('appSec')">✕ Clear</button>
+        </div>
+      </div>
+
+      <div class="table-wrap" id="tbl-appSec">
+        <div class="empty-state">
+          <div class="empty-icon">📂</div>
+          <div class="empty-title">Upload the training status file and click Calculate</div>
+          <div>Results will appear here</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION: GROWTH GROUP
+  ============================================================ -->
+  <div class="section-panel" id="panel-growth">
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title-block">
+          <div class="section-dot dot-green"></div>
+          <div>
+            <div class="section-title">Growth Group</div>
+            <div class="section-desc">Mandatory Anti-Phishing Training — Growth Group #ABI — Training status export only (no userbase)</div>
+          </div>
+        </div>
+        <div class="section-controls">
+          <span class="date-label">Assignment Date:</span>
+          <input type="date" class="date-input" id="date-growth" value="">
+        </div>
+      </div>
+
+      <div class="metrics-row">
+        <div class="metric-box">
+          <div class="metric-label">Total Users</div>
+          <div class="metric-val kpi-accent" id="m-growth-total">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Completed</div>
+          <div class="metric-val kpi-green" id="m-growth-completed">—</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="pb-growth" style="width:0%;background:var(--green)"></div></div>
+          </div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Pending</div>
+          <div class="metric-val kpi-red" id="m-growth-pending">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Last Calculated</div>
+          <div class="metric-val" style="font-size:12px;padding-top:4px;font-family:'DM Mono',monospace;color:var(--text3)" id="m-growth-calc">Never</div>
+        </div>
+      </div>
+
+      <div class="uploads-grid" style="grid-template-columns:1fr">
+        <div class="upload-zone" id="uz-growth-tool" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'growth','tool')">
+          <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'growth','tool')">
+          <div class="upload-icon">📊</div>
+          <div class="upload-title">Training status / tool export</div>
+          <div class="upload-hint">LMS export with Employee ID, email, transcript status, dates</div>
+          <div class="upload-filename" id="fn-growth-tool"></div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <div class="last-calc" id="lc-growth">No calculation yet</div>
+        <div class="btns-group">
+          <button class="btn btn-primary" id="btn-calc-growth" onclick="calcSection('growth')">▶ Calculate</button>
+          <button class="btn btn-success" id="btn-dl-growth" onclick="downloadSection('growth')" disabled>⬇ Download Excel</button>
+          <button class="btn btn-ghost" id="btn-dl-pending-growth" onclick="downloadPendingSection('growth')" disabled>⚠ Download Pending Users</button>
+          <button class="btn btn-ghost" onclick="clearSection('growth')">✕ Clear</button>
+        </div>
+      </div>
+
+      <div class="table-wrap" id="tbl-growth">
+        <div class="empty-state">
+          <div class="empty-icon">📂</div>
+          <div class="empty-title">Upload the training status file and click Calculate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION: NEW JOINER
+  ============================================================ -->
+  <div class="section-panel" id="panel-newJoiner">
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title-block">
+          <div class="section-dot dot-yellow"></div>
+          <div>
+            <div class="section-title">New Joiner</div>
+            <div class="section-desc">IT Security Awareness — English #ABI — Training status only; outputs split by year: 2024, 2025, 2026</div>
+          </div>
+        </div>
+        <div class="section-controls">
+          <span class="date-label">Assignment Date:</span>
+          <input type="date" class="date-input" id="date-newJoiner" value="">
+        </div>
+      </div>
+
+      <div class="metrics-row">
+        <div class="metric-box">
+          <div class="metric-label">Total Users</div>
+          <div class="metric-val kpi-accent" id="m-newJoiner-total">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Completed</div>
+          <div class="metric-val kpi-green" id="m-newJoiner-completed">—</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="pb-newJoiner" style="width:0%;background:var(--green)"></div></div>
+          </div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Pending</div>
+          <div class="metric-val kpi-red" id="m-newJoiner-pending">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Last Calculated</div>
+          <div class="metric-val" style="font-size:12px;padding-top:4px;font-family:'DM Mono',monospace;color:var(--text3)" id="m-newJoiner-calc">Never</div>
+        </div>
+      </div>
+
+      <div class="uploads-grid" style="grid-template-columns:1fr">
+        <div class="upload-zone" id="uz-newJoiner-tool" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'newJoiner','tool')">
+          <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'newJoiner','tool')">
+          <div class="upload-icon">📊</div>
+          <div class="upload-title">Training status / tool export</div>
+          <div class="upload-hint">IT Security Awareness export with Employee ID, email, transcript status, training start date</div>
+          <div class="upload-filename" id="fn-newJoiner-tool"></div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <div class="last-calc" id="lc-newJoiner">No calculation yet</div>
+        <div class="btns-group">
+          <button class="btn btn-primary" id="btn-calc-newJoiner" onclick="calcSection('newJoiner')">▶ Calculate</button>
+          <button class="btn btn-success" id="btn-dl-newJoiner" onclick="downloadSection('newJoiner')" disabled>⬇ Download Excel (3 sheets)</button>
+          <button class="btn btn-ghost" id="btn-dl-pending-newJoiner" onclick="downloadPendingSection('newJoiner')" disabled>⚠ Download Pending Users</button>
+          <button class="btn btn-ghost" onclick="clearSection('newJoiner')">✕ Clear</button>
+        </div>
+      </div>
+
+      <!-- Year sub-tabs -->
+      <div class="sheet-tabs" id="nj-tabs" style="display:none">
+        <button class="sheet-tab active" onclick="switchNJTab('2024')">2024</button>
+        <button class="sheet-tab" onclick="switchNJTab('2025')">2025</button>
+        <button class="sheet-tab" onclick="switchNJTab('2026')">2026</button>
+      </div>
+
+      <div class="sheet-content active" id="nj-sheet-2024">
+        <div class="table-wrap" id="tbl-newJoiner-2024">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload the training status file and calculate</div></div>
+        </div>
+      </div>
+      <div class="sheet-content" id="nj-sheet-2025">
+        <div class="table-wrap" id="tbl-newJoiner-2025">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload the training status file and calculate</div></div>
+        </div>
+      </div>
+      <div class="sheet-content" id="nj-sheet-2026">
+        <div class="table-wrap" id="tbl-newJoiner-2026">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload the training status file and calculate</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION: BSC
+  ============================================================ -->
+  <div class="section-panel" id="panel-bsc">
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title-block">
+          <div class="section-dot dot-purple"></div>
+          <div>
+            <div class="section-title">BSC</div>
+            <div class="section-desc">Don't take the bait — Avoid Financial Impact of Phishing #ABI — Userbase: BSC_overall_userbase.xlsx</div>
+          </div>
+        </div>
+        <div class="section-controls">
+          <span class="date-label">Assignment Date:</span>
+          <input type="date" class="date-input" id="date-bsc" value="">
+        </div>
+      </div>
+
+      <div class="metrics-row">
+        <div class="metric-box">
+          <div class="metric-label">Total Users</div>
+          <div class="metric-val kpi-accent" id="m-bsc-total">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Completed</div>
+          <div class="metric-val kpi-green" id="m-bsc-completed">—</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="pb-bsc" style="width:0%;background:var(--green)"></div></div>
+          </div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Pending</div>
+          <div class="metric-val kpi-red" id="m-bsc-pending">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Last Calculated</div>
+          <div class="metric-val" style="font-size:12px;padding-top:4px;font-family:'DM Mono',monospace;color:var(--text3)" id="m-bsc-calc">Never</div>
+        </div>
+      </div>
+
+      <div class="uploads-grid">
+        <div class="upload-zone" id="uz-bsc-base" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'bsc','base')">
+          <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'bsc','base')">
+          <div class="upload-icon">📋</div>
+          <div class="upload-title">Base Userbase Excel</div>
+          <div class="upload-hint">BSC_overall_userbase.xlsx</div>
+          <div class="upload-filename" id="fn-bsc-base"></div>
+        </div>
+        <div class="upload-zone" id="uz-bsc-tool" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'bsc','tool')">
+          <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'bsc','tool')">
+          <div class="upload-icon">📊</div>
+          <div class="upload-title">Tool Output Excel</div>
+          <div class="upload-hint">20260227__Don_t_take_the_bait__Avoid_Financial__impact_of__Phishing___ABI.xlsx</div>
+          <div class="upload-filename" id="fn-bsc-tool"></div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <div class="last-calc" id="lc-bsc">No calculation yet</div>
+        <div class="btns-group">
+          <button class="btn btn-primary" id="btn-calc-bsc" onclick="calcSection('bsc')">▶ Calculate</button>
+          <button class="btn btn-success" id="btn-dl-bsc" onclick="downloadSection('bsc')" disabled>⬇ Download Excel</button>
+          <button class="btn btn-ghost" id="btn-dl-pending-bsc" onclick="downloadPendingSection('bsc')" disabled>⚠ Download Pending Users</button>
+          <button class="btn btn-ghost" onclick="clearSection('bsc')">✕ Clear</button>
+        </div>
+      </div>
+
+      <div class="table-wrap" id="tbl-bsc">
+        <div class="empty-state">
+          <div class="empty-icon">📂</div>
+          <div class="empty-title">Upload both files and click Calculate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION: PHISHING NORMAL USER
+  ============================================================ -->
+  <div class="section-panel" id="panel-phishingNormal">
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title-block">
+          <div class="section-dot dot-red"></div>
+          <div>
+            <div class="section-title">Phishing — Normal Users</div>
+            <div class="section-desc">Security & Compliance Awareness : Phishing #ABI — Userbase: Phishing_Tracking_Input.xlsx</div>
+          </div>
+        </div>
+        <div class="section-controls">
+          <span class="date-label">Assignment Date:</span>
+          <input type="date" class="date-input" id="date-phishingNormal" value="">
+        </div>
+      </div>
+
+      <div class="metrics-row">
+        <div class="metric-box">
+          <div class="metric-label">Total Users</div>
+          <div class="metric-val kpi-accent" id="m-phishingNormal-total">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Completed</div>
+          <div class="metric-val kpi-green" id="m-phishingNormal-completed">—</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="pb-phishingNormal" style="width:0%;background:var(--green)"></div></div>
+          </div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Pending</div>
+          <div class="metric-val kpi-red" id="m-phishingNormal-pending">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Last Calculated</div>
+          <div class="metric-val" style="font-size:12px;padding-top:4px;font-family:'DM Mono',monospace;color:var(--text3)" id="m-phishingNormal-calc">Never</div>
+        </div>
+      </div>
+
+      <div class="uploads-grid">
+        <div class="upload-zone" id="uz-phishingNormal-base" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'phishingNormal','base')">
+          <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'phishingNormal','base')">
+          <div class="upload-icon">📋</div>
+          <div class="upload-title">Phishing Tracking Input</div>
+          <div class="upload-hint">Phishing_Tracking_Input.xlsx (Band 4+ = No filter)</div>
+          <div class="upload-filename" id="fn-phishingNormal-base"></div>
+        </div>
+        <div class="upload-zone" id="uz-phishingNormal-tool" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'phishingNormal','tool')">
+          <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'phishingNormal','tool')">
+          <div class="upload-icon">📊</div>
+          <div class="upload-title">Tool Output Excel</div>
+          <div class="upload-hint">20260227_Security___Compliance_Awareness___Phishing__ABI.xlsx</div>
+          <div class="upload-filename" id="fn-phishingNormal-tool"></div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <div class="last-calc" id="lc-phishingNormal">No calculation yet</div>
+        <div class="btns-group">
+          <button class="btn btn-primary" id="btn-calc-phishingNormal" onclick="calcSection('phishingNormal')">▶ Calculate</button>
+          <button class="btn btn-success" id="btn-dl-phishingNormal" onclick="downloadSection('phishingNormal')" disabled>⬇ Download Excel</button>
+          <button class="btn btn-ghost" id="btn-dl-pending-phishingNormal" onclick="downloadPendingSection('phishingNormal')" disabled>⚠ Download Pending Users</button>
+          <button class="btn btn-ghost" onclick="clearSection('phishingNormal')">✕ Clear</button>
+        </div>
+      </div>
+
+      <div class="table-wrap" id="tbl-phishingNormal">
+        <div class="empty-state">
+          <div class="empty-icon">📂</div>
+          <div class="empty-title">Upload both files and click Calculate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION: BAND 4+
+  ============================================================ -->
+  <div class="section-panel" id="panel-band4">
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title-block">
+          <div class="section-dot dot-orange"></div>
+          <div>
+            <div class="section-title">Band 4+ / Senior Management</div>
+            <div class="section-desc">Security & Compliance Awareness Training (Sr. Management) #ABI — Userbase: Phishing_Tracking_Input.xlsx</div>
+          </div>
+        </div>
+        <div class="section-controls">
+          <span class="date-label">Assignment Date:</span>
+          <input type="date" class="date-input" id="date-band4" value="">
+        </div>
+      </div>
+
+      <div class="metrics-row">
+        <div class="metric-box">
+          <div class="metric-label">Total Users</div>
+          <div class="metric-val kpi-accent" id="m-band4-total">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Completed</div>
+          <div class="metric-val kpi-green" id="m-band4-completed">—</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="pb-band4" style="width:0%;background:var(--green)"></div></div>
+          </div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Pending</div>
+          <div class="metric-val kpi-red" id="m-band4-pending">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Last Calculated</div>
+          <div class="metric-val" style="font-size:12px;padding-top:4px;font-family:'DM Mono',monospace;color:var(--text3)" id="m-band4-calc">Never</div>
+        </div>
+      </div>
+
+      <div class="uploads-grid">
+        <div class="upload-zone" id="uz-band4-base" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'band4','base')">
+          <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'band4','base')">
+          <div class="upload-icon">📋</div>
+          <div class="upload-title">Phishing Tracking Input</div>
+          <div class="upload-hint">Phishing_Tracking_Input.xlsx (Band 4+ = Yes filter)</div>
+          <div class="upload-filename" id="fn-band4-base"></div>
+        </div>
+        <div class="upload-zone" id="uz-band4-tool" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'band4','tool')">
+          <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'band4','tool')">
+          <div class="upload-icon">📊</div>
+          <div class="upload-title">Tool Output Excel</div>
+          <div class="upload-hint">20260211_Security___Compliance_Awareness_Training__Sr__Management___ABI.xlsx</div>
+          <div class="upload-filename" id="fn-band4-tool"></div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <div class="last-calc" id="lc-band4">No calculation yet</div>
+        <div class="btns-group">
+          <button class="btn btn-primary" id="btn-calc-band4" onclick="calcSection('band4')">▶ Calculate</button>
+          <button class="btn btn-success" id="btn-dl-band4" onclick="downloadSection('band4')" disabled>⬇ Download Excel</button>
+          <button class="btn btn-ghost" id="btn-dl-pending-band4" onclick="downloadPendingSection('band4')" disabled>⚠ Download Pending Users</button>
+          <button class="btn btn-ghost" onclick="clearSection('band4')">✕ Clear</button>
+        </div>
+      </div>
+
+      <div class="table-wrap" id="tbl-band4">
+        <div class="empty-state">
+          <div class="empty-icon">📂</div>
+          <div class="empty-title">Upload both files and click Calculate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<script>
+'use strict';
+
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  files: {}, // { 'appSec-base': ArrayBuffer, 'appSec-tool': ArrayBuffer, ... }
+  results: {}, // processed output per section
+  filesCount: 0,
+};
+
+// Section configs
+const SECTIONS = {
+  appSec: {
+    label: 'Application Security',
+    trainingName: 'Introduction to Application Security #ABI',
+    baseType: 'appSec',
+    toolOnly: true,
+    baseIdCol: 'Local Employee ID',
+    baseEmailCol: 'Employee Email',
+    toolHeaderRow: 20,
+    phishingFilter: null,
+    outputFile: 'AppSec_Output.xlsx',
+  },
+  growth: {
+    label: 'Growth Group',
+    trainingName: 'Mandatory Anti-Phishing Training — Growth Group #ABI',
+    baseType: 'growth',
+    toolOnly: true,
+    baseIdCol: 'Local Employee ID',
+    baseEmailCol: 'Employee Email',
+    toolHeaderRow: 20,
+    phishingFilter: null,
+    outputFile: 'Growth_Output.xlsx',
+  },
+  newJoiner: {
+    label: 'New Joiner',
+    trainingName: 'IT Security Awareness - English #ABI',
+    baseType: 'newJoiner',
+    toolOnly: true,
+    baseIdCol: null,
+    baseEmailCol: null,
+    toolHeaderRow: 20,
+    phishingFilter: null,
+    outputFile: 'NewJoiner_Output.xlsx',
+  },
+  bsc: {
+    label: 'BSC',
+    trainingName: "Don't take the bait — Avoid Financial Impact of Phishing #ABI",
+    baseType: 'bsc',
+    baseIdCol: 'Emp ID',
+    baseEmailCol: 'Email - Primary Work',
+    toolHeaderRow: 20,
+    phishingFilter: null,
+    outputFile: 'BSC_Output.xlsx',
+  },
+  phishingNormal: {
+    label: 'Phishing Normal Users',
+    trainingName: 'Security & Compliance Awareness : Phishing #ABI',
+    baseType: 'phishingNormal',
+    baseIdCol: 'Local Employee ID',
+    baseEmailCol: 'Employee Email',
+    toolHeaderRow: 20,
+    phishingFilter: null, // all non-band4+ users (or all)
+    outputFile: 'Phishing_Normal_Output.xlsx',
+  },
+  band4: {
+    label: 'Band 4+ Senior Management',
+    trainingName: 'Security & Compliance Awareness Training (Sr. Management) #ABI',
+    baseType: 'band4',
+    baseIdCol: 'Local Employee ID',
+    baseEmailCol: 'Employee Email',
+    toolHeaderRow: 20,
+    phishingFilter: 'band4plus', // filter Band 4+ = Yes
+    outputFile: 'Band4Plus_Output.xlsx',
+  },
+};
+
+const OUTPUT_COLS = ['Employee ID', 'Work Email Address', 'Transcript Status', 'Training Start Date', 'Transcript Completed Date'];
+
+// ============================================================
+// CLOCK
+// ============================================================
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('en-GB');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Set default dates to today
+(function setDefaultDates() {
+  const today = new Date().toISOString().split('T')[0];
+  ['appSec','growth','newJoiner','bsc','phishingNormal','band4'].forEach(s => {
+    const el = document.getElementById('date-'+s);
+    if (el) el.value = today;
+  });
+})();
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(sectionId) {
+  document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-'+sectionId).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function switchNJTab(year) {
+  document.querySelectorAll('#panel-newJoiner .sheet-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#panel-newJoiner .sheet-content').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('nj-sheet-'+year).classList.add('active');
+}
+
+// ============================================================
+// FILE UPLOAD
+// ============================================================
+function dragOver(e, el) {
+  e.preventDefault();
+  el.classList.add('drag-over');
+}
+function dragLeave(el) {
+  el.classList.remove('drag-over');
+}
+function dropFile(e, section, type) {
+  e.preventDefault();
+  const el = document.getElementById('uz-'+section+'-'+type);
+  el.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processFileUpload(file, section, type);
+}
+function fileSelected(e, section, type) {
+  const file = e.target.files[0];
+  if (file) processFileUpload(file, section, type);
+}
+
+function processFileUpload(file, section, type) {
+  if (!file.name.match(/\.(xlsx|xls)$/i)) {
+    toast('error', 'Please upload an Excel file (.xlsx or .xls)');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const key = section + '-' + type;
+    state.files[key] = e.target.result;
+    state.filesCount++;
+    document.getElementById('kpi-files').textContent = state.filesCount;
+    document.getElementById('fn-'+section+'-'+type).textContent = '✓ ' + file.name;
+    const uz = document.getElementById('uz-'+section+'-'+type);
+    uz.classList.add('has-file');
+    toast('info', `Loaded: ${file.name}`);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ============================================================
+// EXCEL PARSING UTILITIES
+// ============================================================
+
+/**
+ * Parse an ArrayBuffer to XLSX workbook
+ */
+function parseWorkbook(ab) {
+  return XLSX.read(new Uint8Array(ab), { type: 'array', cellDates: true });
+}
+
+/**
+ * Read one cell as display text (handles dates, NBSP, trims).
+ */
+function cellTextFromSheet(sheet, r, c) {
+  const addr = XLSX.utils.encode_cell({ r, c });
+  const cell = sheet[addr];
+  if (!cell || cell.v === undefined || cell.v === null) return '';
+  if (cell.t === 'd' && cell.v instanceof Date) return cell.v.toISOString();
+  return String(cell.v).replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * All cell strings for row r (within decoded range columns).
+ */
+function getRowCellStrings(sheet, range, r) {
+  const rowVals = [];
+  for (let c = range.s.c; c <= range.e.c; c++) rowVals.push(cellTextFromSheet(sheet, r, c));
+  return rowVals;
+}
+
+/**
+ * Build unique header names: empty columns become __col_N; duplicate labels get [2], [3].
+ */
+function buildHeadersForRow(sheet, range, headerRowIndex) {
+  const raw = getRowCellStrings(sheet, range, headerRowIndex);
+  const names = raw.map((v, ci) => {
+    const t = (v || '').trim();
+    return t ? t.replace(/\s+/g, ' ') : '__col_' + ci;
+  });
+  const counts = {};
+  return names.map(h => {
+    if (/^__col_\d+$/.test(h)) return h;
+    const k = h.toLowerCase();
+    counts[k] = (counts[k] || 0) + 1;
+    if (counts[k] > 1) return h + ' [' + counts[k] + ']';
+    return h;
+  });
+}
+
+/**
+ * Score a row as a likely training / LMS table header using keyword matches in any cell.
+ * Returns 0–5.
+ */
+function scoreTrainingHeaderRow(cellStrings) {
+  const cells = cellStrings.map(v => String(v === undefined || v === null ? '' : v).trim()).filter(Boolean);
+  if (cells.length < 2) return 0;
+  const any = re => cells.some(t => re.test(t));
+  let score = 0;
+  if (any(/local\s*employee\s*id/i) || any(/^employee\s*id$/i) || any(/^emp\.?\s*id$/i) || any(/^person\s*id$/i) || cells.some(t => /\bemployee\b/i.test(t) && /\bid\b/i.test(t)))
+    score++;
+  if (any(/work\s*email|email\s*[- ]?address|employee\s*email|^e-?mail$/i) || any(/user\s*principal|\bupn\b|smtp|sign\s*-?\s*in/i))
+    score++;
+  if (any(/transcript\s*status|completion\s*status|learning\s*status|course\s*status|enrollment\s*status/i) || any(/^status$/i) || any(/^progress$/i))
+    score++;
+  if (any(/training\s*start|assignment\s*start|course\s*start|started\s*on|launch\s*date|assigned|enroll/i))
+    score++;
+  if (any(/transcript\s*completed|completed\s*date|completion\s*date|date\s*completed|finished\s*on|pass\s*date/i) || any(/^completed$/i))
+    score++;
+  return score;
+}
+
+/**
+ * Map training export column headers by keyword (handles varying LMS / Cornerstone / Degreed / Workday exports).
+ */
+function resolveToolColumnHeaders(toolData) {
+  const h = toolData.headers.map(x => {
+    let s = String(x ?? '');
+    if (/^__col_\d+$/.test(s)) return s;
+    return s.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+  });
+  const find = pred => {
+    const idx = h.findIndex(pred);
+    return idx >= 0 ? h[idx] : null;
+  };
+  const toolIdCol = find(s => /^employee\s*id$/i.test(s)) ||
+    find(s => /^(worker|staff|network|system)\s*id$/i.test(s)) ||
+    find(s => /local\s*employee\s*id|personnel|people\s*id|person\s*id|federation\s*id|object\s*id|^emp\.?\s*id$/i.test(s)) ||
+    find(s => /\bemployee\b.*\bid\b|\bid\b.*\b(employee|worker|person|staff)\b/i.test(s)) ||
+    find(s => /^user\s*id$/i.test(s)) ||
+    find(s => /^uid$/i.test(s)) ||
+    find(s => /^person\s*number$/i.test(s)) ||
+    find(s => /pernr|personnel\s*number|personnel\s*no\.?/i.test(s));
+  const toolEmailCol = find(s => /work\s*email|email\s*[- ]?address|employee\s*email|primary\s*(e[- ]?mail|smtp)|^e-?mail$/i.test(s)) ||
+    find(s => /user\s*principal|(^|\s)upn(\s|$)|login\s*\/?\s*email|^mail$/i.test(s)) ||
+    find(s => /smtp|contact\s*email|o365|microsoft\s*id|sign\s*-?\s*in\s*name/i.test(s)) ||
+    find(s => /^username$/i.test(s)) ||
+    find(s => /^login$/i.test(s));
+  const toolStatusCol = find(s => /transcript\s*status|completion\s*status|learning\s*status|course\s*status|training\s*status|record\s*status|enrollment\s*status/i.test(s)) ||
+    find(s => /^status$/i.test(s)) ||
+    find(s => /^(progress|state)$/i.test(s)) ||
+    find(s => /%?\s*complete|percentage\s*complete/i.test(s));
+  const toolStartCol = find(s => /training\s*start|assignment\s*start|course\s*start|started\s*on|launch\s*date|date\s*assigned|assigned\s*(on|date)?|enroll(ment)?\s*date|registration\s*date|invite\s*date|begin\s*date/i.test(s)) ||
+    find(s => /^assigned$/i.test(s));
+  const toolCompleteCol = find(s => /transcript\s*completed|completed\s*date|completion\s*date|date\s*completed|finished\s*on|date\s*passed|last\s*completed/i.test(s)) ||
+    find(s => /^completed$/i.test(s)) ||
+    find(s => /pass\s*date|certificate/i.test(s));
+  return { toolIdCol, toolEmailCol, toolStatusCol, toolStartCol, toolCompleteCol };
+}
+
+/**
+ * Treat row headerRowIndex as the header: resolve columns + check following rows look like data (emails, IDs).
+ */
+function scoreRowAsTrainingHeader(sheet, range, headerRowIndex) {
+  const headers = buildHeadersForRow(sheet, range, headerRowIndex);
+  const cols = resolveToolColumnHeaders({ headers, rows: [] });
+  let resolved = 0;
+  if (cols.toolIdCol) resolved++;
+  if (cols.toolEmailCol) resolved++;
+  if (cols.toolStatusCol) resolved++;
+  if (cols.toolStartCol) resolved++;
+  if (cols.toolCompleteCol) resolved++;
+  if (resolved === 0) return 0;
+
+  const sampleRows = [];
+  for (let r = headerRowIndex + 1; r <= Math.min(range.e.r, headerRowIndex + 25); r++) {
+    const row = {};
+    for (let c = 0; c < headers.length; c++) {
+      const addr = XLSX.utils.encode_cell({ r, c: c + range.s.c });
+      const cell = sheet[addr];
+      row[headers[c]] = cell ? (cell.t === 'd' ? cell.v : (cell.v !== undefined ? cell.v : '')) : '';
+    }
+    const vals = Object.values(row).filter(v => v !== '' && v !== null && v !== undefined);
+    if (vals.length >= 2) sampleRows.push(row);
+    if (sampleRows.length >= 18) break;
+  }
+
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
+  let emailHits = 0;
+  let idHits = 0;
+  for (const row of sampleRows) {
+    if (cols.toolEmailCol) {
+      const e = String(row[cols.toolEmailCol] ?? '').trim();
+      if (emailRe.test(e)) emailHits++;
+    }
+    if (cols.toolIdCol) {
+      const id = String(row[cols.toolIdCol] ?? '').trim();
+      if (id && !emailRe.test(id) && id.length >= 2 && id.length < 72) idHits++;
+    }
+  }
+
+  let score = resolved * 5;
+  score += Math.min(emailHits, 10) * 4;
+  score += Math.min(idHits, 10) * 2;
+  if (cols.toolEmailCol && sampleRows.length >= 2 && emailHits === 0) score -= 10;
+  if (cols.toolIdCol && sampleRows.length >= 2 && idHits === 0) score -= 4;
+  return score;
+}
+
+function collectDataRows(sheet, range, headerRowIndex, headers) {
+  const rows = [];
+  for (let r = headerRowIndex + 1; r <= range.e.r; r++) {
+    const row = {};
+    for (let c = 0; c < headers.length; c++) {
+      const addr = XLSX.utils.encode_cell({ r, c: c + range.s.c });
+      const cell = sheet[addr];
+      row[headers[c]] = cell ? (cell.t === 'd' ? cell.v : (cell.v !== undefined ? cell.v : '')) : '';
+    }
+    const vals = Object.values(row).filter(v => v !== '' && v !== null && v !== undefined);
+    if (vals.length > 0) rows.push(row);
+  }
+  return rows;
+}
+
+/**
+ * Find header row and parse data. Tries every row: resolves LMS columns + validates sample data;
+ * then keyword heuristics; then first dense row (userbase-style sheets).
+ */
+function detectHeaders(sheet, minCols = 3) {
+  const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1:A1');
+  const maxR = Math.min(range.e.r, range.s.r + 500);
+
+  const RESOLVED_HEADER_MIN = 5;
+  let bestScore = -1e9;
+  let bestRow = -1;
+  for (let r = range.s.r; r <= maxR; r++) {
+    const sc = scoreRowAsTrainingHeader(sheet, range, r);
+    if (sc >= bestScore) {
+      bestScore = sc;
+      bestRow = r;
+    }
+  }
+
+  let headerRowIndex = range.s.r;
+  let headers = [];
+
+  if (bestRow >= 0 && bestScore >= RESOLVED_HEADER_MIN) {
+    headerRowIndex = bestRow;
+    headers = buildHeadersForRow(sheet, range, headerRowIndex);
+  } else {
+    let bestKeywordScore = -1;
+    let bestKeywordRow = -1;
+    for (let r = range.s.r; r <= maxR; r++) {
+      const rowVals = getRowCellStrings(sheet, range, r);
+      const sc = scoreTrainingHeaderRow(rowVals);
+      if (sc >= bestKeywordScore) {
+        bestKeywordScore = sc;
+        bestKeywordRow = r;
+      }
+    }
+    const KW_MIN = 2;
+    if (bestKeywordScore >= KW_MIN && bestKeywordRow >= 0) {
+      headerRowIndex = bestKeywordRow;
+      headers = buildHeadersForRow(sheet, range, headerRowIndex);
+    } else {
+      for (let r = range.s.r; r <= range.e.r; r++) {
+        const rowVals = getRowCellStrings(sheet, range, r);
+        const nonEmpty = rowVals.filter(v => v !== '').length;
+        if (nonEmpty >= minCols) {
+          headerRowIndex = r;
+          headers = buildHeadersForRow(sheet, range, headerRowIndex);
+          break;
+        }
+      }
+      if (!headers.length) headers = buildHeadersForRow(sheet, range, range.s.r);
+    }
+  }
+
+  const rows = collectDataRows(sheet, range, headerRowIndex, headers);
+  return { headers, headerRowIndex, rows };
+}
+
+/**
+ * For workbooks with cover / summary sheets, pick the sheet whose detected table best matches a training export.
+ */
+function detectHeadersFromWorkbook(wb) {
+  if (!wb.SheetNames || wb.SheetNames.length === 0) {
+    throw new Error('Workbook has no sheets');
+  }
+  let bestDh = null;
+  let bestMerit = -1;
+  for (let i = 0; i < wb.SheetNames.length; i++) {
+    const sh = wb.Sheets[wb.SheetNames[i]];
+    const dh = detectHeaders(sh);
+    const cols = resolveToolColumnHeaders(dh);
+    let merit = 0;
+    if (cols.toolEmailCol) merit += 12;
+    if (cols.toolIdCol) merit += 10;
+    if (cols.toolEmailCol && cols.toolIdCol) merit += 6;
+    if (cols.toolStatusCol) merit += 5;
+    if (cols.toolStartCol) merit += 2;
+    if (cols.toolCompleteCol) merit += 2;
+    if (dh.rows.length) merit += Math.min(dh.rows.length, 500) * 0.02;
+    if (dh.rows[0] && cols.toolEmailCol) {
+      const e = String(dh.rows[0][cols.toolEmailCol] ?? '').trim();
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(e)) merit += 20;
+    }
+    if (merit > bestMerit) {
+      bestMerit = merit;
+      bestDh = dh;
+    }
+  }
+  return bestDh || detectHeaders(wb.Sheets[wb.SheetNames[0]]);
+}
+
+/**
+ * Normalize a string for comparison (lowercase, trim)
+ */
+function norm(v) {
+  if (v === null || v === undefined) return '';
+  return String(v).toLowerCase().trim();
+}
+
+/**
+ * Normalize employee ID
+ */
+function normId(v) {
+  if (v === null || v === undefined) return '';
+  return String(v).replace(/\s/g, '').toLowerCase();
+}
+
+/**
+ * Format a date value from XLSX
+ */
+function fmtDate(v) {
+  if (!v) return '';
+  if (v instanceof Date) {
+    return v.toLocaleDateString('en-GB'); // DD/MM/YYYY
+  }
+  // Try parsing
+  const d = new Date(v);
+  if (!isNaN(d.getTime())) return d.toLocaleDateString('en-GB');
+  return String(v);
+}
+
+/**
+ * Build a lookup map from an array of rows
+ * Keys: email (lower) and empId
+ * Returns Map<key, row>
+ */
+function buildLookupMap(rows, emailCol, idCol) {
+  const map = new Map();
+  rows.forEach(row => {
+    if (emailCol) {
+      const e = norm(row[emailCol]);
+      if (e) map.set(e, row);
+    }
+    if (idCol) {
+      const id = normId(row[idCol]);
+      if (id) map.set(id, row);
+    }
+  });
+  return map;
+}
+
+/**
+ * Find a match for a user in a lookup map
+ */
+function findMatch(map, email, empId) {
+  if (email) {
+    const r = map.get(norm(email));
+    if (r) return r;
+  }
+  if (empId) {
+    const r = map.get(normId(String(empId)));
+    if (r) return r;
+  }
+  return null;
+}
+
+function processTrainingStatusToolOnly(toolAB, assignDate) {
+  const toolWb = parseWorkbook(toolAB);
+  const toolData = detectHeadersFromWorkbook(toolWb);
+  const { toolIdCol, toolEmailCol, toolStatusCol, toolStartCol, toolCompleteCol } = resolveToolColumnHeaders(toolData);
+  if (!toolIdCol && !toolEmailCol) {
+    throw new Error('Could not find Employee ID or email columns after the detected header row.');
+  }
+
+  const output = [];
+  const seen = new Set();
+
+  for (const toolRow of toolData.rows) {
+    const empId = toolIdCol ? toolRow[toolIdCol] : '';
+    const email = toolEmailCol ? toolRow[toolEmailCol] : '';
+
+    const dedupeKey = normId(String(empId || '')) || norm(email);
+    if (dedupeKey && seen.has(dedupeKey)) continue;
+    if (dedupeKey) seen.add(dedupeKey);
+
+    const rawStatus = String((toolStatusCol ? toolRow[toolStatusCol] : '') || '').trim();
+    const startRaw = toolStartCol ? toolRow[toolStartCol] : '';
+    const completedRaw = toolCompleteCol ? toolRow[toolCompleteCol] : '';
+
+    let startDate = fmtDate(startRaw);
+    if (!startDate && norm(rawStatus) !== 'completed' && assignDate) startDate = assignDate;
+
+    const completedDate = fmtDate(completedRaw);
+    const hasCompletedDate = completedDate && completedDate.trim() !== '';
+
+    let status;
+    if (hasCompletedDate) {
+      status = 'Completed';
+    } else if (/in progress/i.test(rawStatus)) {
+      status = 'In Progress';
+    } else if (rawStatus) {
+      status = rawStatus;
+    } else {
+      status = 'Not Started';
+    }
+
+    output.push({
+      'Employee ID': empId,
+      'Work Email Address': email,
+      'Transcript Status': status,
+      'Training Start Date': startDate || fmtDate(startRaw),
+      'Transcript Completed Date': completedDate,
+    });
+  }
+
+  return output;
+}
+// CORE PROCESSING LOGIC
+// ============================================================
+
+/**
+ * Generic section processor:
+ * - Reads base userbase
+ * - Reads tool output (finds headers dynamically)
+ * - Matches users by email/ID
+ * - Returns processed rows with required output columns
+ */
+function processSection(section, baseAB, toolAB, assignDate, filterFn) {
+  const cfg = SECTIONS[section];
+
+  // Parse base
+  const baseWb = parseWorkbook(baseAB);
+  const baseSheet = baseWb.Sheets[baseWb.SheetNames[0]];
+  const baseData = detectHeaders(baseSheet);
+
+  // Parse tool
+  const toolWb = parseWorkbook(toolAB);
+  const toolData = detectHeadersFromWorkbook(toolWb);
+
+  // Determine base columns dynamically
+  let baseIdCol = cfg.baseIdCol;
+  let baseEmailCol = cfg.baseEmailCol;
+
+  // Auto-detect if not found
+  if (!baseIdCol || !baseData.headers.includes(baseIdCol)) {
+    baseIdCol = baseData.headers.find(h => /employee.?id|emp.?id|local.?id/i.test(h)) || null;
+  }
+  if (!baseEmailCol || !baseData.headers.includes(baseEmailCol)) {
+    baseEmailCol = baseData.headers.find(h => /email/i.test(h)) || null;
+  }
+
+  // Apply filter (e.g., Band 4+ = Yes)
+  let baseRows = baseData.rows;
+  if (filterFn) baseRows = baseRows.filter(filterFn);
+
+  const tc = resolveToolColumnHeaders(toolData);
+  const toolEmailCol = tc.toolEmailCol;
+  const toolIdCol = tc.toolIdCol;
+  const toolStatusCol = tc.toolStatusCol;
+  const toolStartCol = tc.toolStartCol;
+  const toolCompleteCol = tc.toolCompleteCol;
+
+  if (!toolEmailCol && !toolIdCol) {
+    throw new Error('Could not resolve Employee ID or email columns in the training export. Check the sheet and column names.');
+  }
+
+  // Build base lookup (used to enrich tool rows with base data if needed)
+  const baseMap = buildLookupMap(baseRows, baseEmailCol, baseIdCol);
+
+  const output = [];
+  const seen = new Set();
+
+  // Iterate ONLY over tool output rows — users not present in the tool file are excluded entirely
+  for (const toolRow of toolData.rows) {
+    const empId = toolRow[toolIdCol];
+    const email = toolRow[toolEmailCol];
+
+    // Dedup by email or ID
+    const dedupeKey = norm(email) || normId(String(empId || ''));
+    if (dedupeKey && seen.has(dedupeKey)) continue;
+    if (dedupeKey) seen.add(dedupeKey);
+
+    const rawStatus = String((toolStatusCol ? toolRow[toolStatusCol] : '') || '').trim();
+    const startDate = fmtDate(toolStartCol ? toolRow[toolStartCol] : '') || (rawStatus !== 'Completed' && assignDate ? assignDate : '');
+    const completedDate = fmtDate(toolCompleteCol ? toolRow[toolCompleteCol] : '');
+
+    const hasCompletedDate = completedDate && completedDate.trim() !== '';
+    let status;
+    if (hasCompletedDate) {
+      status = 'Completed';
+    } else if (rawStatus) {
+      status = rawStatus;
+    } else {
+      status = 'Not Started';
+    }
+
+    output.push({
+      'Employee ID': empId,
+      'Work Email Address': email,
+      'Transcript Status': status,
+      'Training Start Date': startDate,
+      'Transcript Completed Date': completedDate,
+    });
+  }
+
+  return output;
+}
+
+/**
+ * BSC-specific processor: handles reassignment logic
+ * - Existing incomplete: keep single, do not duplicate
+ * - Completed: allow new assignment
+ */
+function processBSC(baseAB, toolAB, assignDate) {
+  const baseWb = parseWorkbook(baseAB);
+  const baseSheet = baseWb.Sheets[baseWb.SheetNames[0]];
+  const baseData = detectHeaders(baseSheet);
+
+  const toolWb = parseWorkbook(toolAB);
+  const toolData = detectHeadersFromWorkbook(toolWb);
+
+  const baseEmailCol = baseData.headers.find(h => /email/i.test(h)) || 'Email - Primary Work';
+  const baseIdCol = baseData.headers.find(h => /emp.?id/i.test(h)) || 'Emp ID';
+
+  const tc = resolveToolColumnHeaders(toolData);
+  const toolEmailCol = tc.toolEmailCol;
+  const toolIdCol = tc.toolIdCol;
+  const toolStatusCol = tc.toolStatusCol;
+  const toolStartCol = tc.toolStartCol;
+  const toolCompleteCol = tc.toolCompleteCol;
+
+  if (!toolEmailCol && !toolIdCol) {
+    throw new Error('Could not resolve Employee ID or email columns in the training export.');
+  }
+
+  const toolMap = buildLookupMap(toolData.rows, toolEmailCol, toolIdCol);
+  const baseMap = buildLookupMap(baseData.rows, baseEmailCol, baseIdCol);
+
+  const output = [];
+  const seen = new Set();
+
+  // Iterate ONLY over tool output rows — users not in the tool file are excluded entirely
+  for (const toolRow of toolData.rows) {
+    const empId = toolRow[toolIdCol];
+    const email = toolRow[toolEmailCol];
+
+    const dedupeKey = norm(email) || normId(String(empId || ''));
+    if (dedupeKey && seen.has(dedupeKey)) continue;
+    if (dedupeKey) seen.add(dedupeKey);
+
+    const existingStatus = String((toolStatusCol ? toolRow[toolStatusCol] : '') || '').trim();
+    const existingStartDate = fmtDate(toolStartCol ? toolRow[toolStartCol] : '');
+
+    let status = 'Not Started';
+    let startDate = assignDate || '';
+    let completedDate = '';
+    let needsNewAssignment = false;
+
+    if (norm(existingStatus) === 'completed') {
+      status = 'Completed';
+      startDate = existingStartDate;
+      completedDate = fmtDate(toolCompleteCol ? toolRow[toolCompleteCol] : '');
+      needsNewAssignment = true;
+    } else if (existingStatus) {
+      status = existingStatus;
+      startDate = existingStartDate;
+      completedDate = '';
+      needsNewAssignment = false;
+    }
+
+    // Reassignment date comparison
+    if (needsNewAssignment && assignDate && existingStartDate) {
+      const newD = new Date(assignDate);
+      const exD = new Date(existingStartDate.split('/').reverse().join('-'));
+      if (!isNaN(newD) && !isNaN(exD) && newD > exD) {
+        status = 'Reassigned';
+        startDate = assignDate;
+        completedDate = '';
+      }
+    }
+
+    output.push({
+      'Employee ID': empId,
+      'Work Email Address': email,
+      'Transcript Status': status,
+      'Training Start Date': startDate,
+      'Transcript Completed Date': completedDate,
+    });
+  }
+
+  return output;
+}
+
+/**
+ * New Joiner: splits by year from Training Start Date. Training status file only.
+ */
+function processNewJoiner(toolAB, assignDate) {
+  const result = { '2024': [], '2025': [], '2026': [] };
+
+  const toolWb = parseWorkbook(toolAB);
+  const toolData = detectHeadersFromWorkbook(toolWb);
+  const { toolIdCol, toolEmailCol, toolStatusCol, toolStartCol, toolCompleteCol } = resolveToolColumnHeaders(toolData);
+  if (!toolIdCol && !toolEmailCol) {
+    throw new Error('Could not find Employee ID or email columns after the detected header row.');
+  }
+
+  const seen = new Set();
+
+  for (const toolRow of toolData.rows) {
+    const empId = toolIdCol ? toolRow[toolIdCol] : '';
+    const email = toolEmailCol ? toolRow[toolEmailCol] : '';
+
+    const dedupeKey = norm(email) || normId(String(empId || ''));
+    if (dedupeKey && seen.has(dedupeKey)) continue;
+    if (dedupeKey) seen.add(dedupeKey);
+
+    const rawStatus = String((toolStatusCol ? toolRow[toolStatusCol] : '') || '').trim();
+    const startRaw = toolStartCol ? toolRow[toolStartCol] : '';
+    const completedRaw = toolCompleteCol ? toolRow[toolCompleteCol] : '';
+
+    let startDate = fmtDate(startRaw);
+    if (!startDate && norm(rawStatus) !== 'completed' && assignDate) startDate = assignDate;
+
+    const completedDate = fmtDate(completedRaw);
+
+    const hasCompletedDate = completedDate && completedDate.trim() !== '';
+    let status;
+    if (hasCompletedDate) {
+      status = 'Completed';
+    } else if (/in progress/i.test(rawStatus)) {
+      status = 'In Progress';
+    } else if (rawStatus) {
+      status = rawStatus;
+    } else {
+      status = 'Not Started';
+    }
+
+    let year = new Date().getFullYear().toString();
+    const sd = toolStartCol ? toolRow[toolStartCol] : null;
+    if (sd) {
+      const d = sd instanceof Date ? sd : new Date(sd);
+      if (!isNaN(d.getTime())) year = String(d.getFullYear());
+    }
+
+    const outRow = {
+      'Employee ID': empId,
+      'Work Email Address': email,
+      'Transcript Status': status,
+      'Training Start Date': startDate || fmtDate(startRaw),
+      'Transcript Completed Date': completedDate,
+    };
+
+    if (result[year]) result[year].push(outRow);
+    else result['2026'].push(outRow);
+  }
+
+  return result;
+}
+
+// ============================================================
+// CALCULATE SECTION
+// ============================================================
+async function calcSection(section) {
+  const cfg = SECTIONS[section];
+  const baseKey = section + '-base';
+  const toolKey = section + '-tool';
+
+  if (!state.files[toolKey]) {
+    toast('error', 'Please upload the training status Excel export first');
+    return;
+  }
+
+  const btn = document.getElementById('btn-calc-' + section);
+  const origText = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner"></span> Processing…';
+  btn.disabled = true;
+
+  await sleep(80); // allow UI to update
+
+  try {
+    const assignDate = document.getElementById('date-' + section)?.value || '';
+    const baseAB = state.files[baseKey] || null;
+    const toolAB = state.files[toolKey];
+
+    let rows;
+    if (section === 'newJoiner') {
+      const njResult = processNewJoiner(toolAB, assignDate);
+      state.results[section] = njResult;
+      renderNewJoinerTables(njResult);
+      updateNJMetrics(njResult);
+    } else if (section === 'bsc') {
+      if (!baseAB) { toast('error', 'Please upload the Base Userbase Excel'); btn.innerHTML = origText; btn.disabled = false; return; }
+      rows = processBSC(baseAB, toolAB, assignDate);
+      state.results[section] = rows;
+      renderTable(section, rows);
+      updateMetrics(section, rows);
+    } else if (section === 'band4') {
+      if (!baseAB) { toast('error', 'Please upload the Phishing Tracking Input Excel'); btn.innerHTML = origText; btn.disabled = false; return; }
+      rows = processSection(section, baseAB, toolAB, assignDate, r => norm(r['Band 4+'] || r['band 4+'] || '') === 'yes');
+      state.results[section] = rows;
+      renderTable(section, rows);
+      updateMetrics(section, rows);
+    } else if (section === 'phishingNormal') {
+      if (!baseAB) { toast('error', 'Please upload the Phishing Tracking Input Excel'); btn.innerHTML = origText; btn.disabled = false; return; }
+      rows = processSection(section, baseAB, toolAB, assignDate, null);
+      state.results[section] = rows;
+      renderTable(section, rows);
+      updateMetrics(section, rows);
+    } else if (section === 'appSec' || section === 'growth') {
+      rows = processTrainingStatusToolOnly(toolAB, assignDate);
+      state.results[section] = rows;
+      renderTable(section, rows);
+      updateMetrics(section, rows);
+    } else {
+      toast('error', 'Unhandled section: ' + section);
+      btn.innerHTML = origText;
+      btn.disabled = false;
+      return;
+    }
+
+    const now = new Date();
+    const ts = now.toLocaleTimeString('en-GB');
+    document.getElementById('lc-' + section).textContent = 'Last calculated: ' + ts;
+    document.getElementById('m-' + section + '-calc').textContent = ts;
+    document.getElementById('kpi-lastrun').textContent = ts;
+    document.getElementById('btn-dl-' + section).disabled = false;
+    const pendingBtn = document.getElementById('btn-dl-pending-' + section);
+    if (pendingBtn) pendingBtn.disabled = false;
+
+    toast('success', `${cfg.label} — calculation complete`);
+    updateGlobalKPIs();
+  } catch (err) {
+    console.error(err);
+    toast('error', 'Error: ' + err.message);
+  }
+
+  btn.innerHTML = origText;
+  btn.disabled = false;
+}
+
+// ============================================================
+// RENDER TABLE
+// ============================================================
+function renderTable(section, rows) {
+  const container = document.getElementById('tbl-' + section);
+  if (!rows || rows.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">No matching users found</div></div>';
+    return;
+  }
+
+  const completedCount = rows.filter(r => norm(r['Transcript Status']) === 'completed').length;
+  const pendingCount = rows.length - completedCount;
+
+  let html = `<table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Employee ID</th>
+        <th>Work Email Address</th>
+        <th>Transcript Status</th>
+        <th>Training Start Date</th>
+        <th>Transcript Completed Date</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+  // Show max 200 rows in UI for performance
+  const displayRows = rows.slice(0, 200);
+  displayRows.forEach((row, i) => {
+    const status = String(row['Transcript Status'] || '').trim();
+    const statusBadge = getStatusBadge(status);
+    html += `<tr>
+      <td class="mono" style="color:var(--text3)">${i+1}</td>
+      <td class="mono">${esc(row['Employee ID'])}</td>
+      <td style="color:var(--text)">${esc(row['Work Email Address'])}</td>
+      <td>${statusBadge}</td>
+      <td class="mono">${esc(row['Training Start Date'])}</td>
+      <td class="mono">${esc(row['Transcript Completed Date'])}</td>
+    </tr>`;
+  });
+
+  if (rows.length > 200) {
+    html += `<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:12px;font-style:italic">... and ${rows.length - 200} more rows (all included in export)</td></tr>`;
+  }
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function renderNewJoinerTables(njResult) {
+  ['2024','2025','2026'].forEach(year => {
+    renderTable('newJoiner-' + year, njResult[year]);
+  });
+  document.getElementById('nj-tabs').style.display = 'flex';
+}
+
+function getStatusBadge(status) {
+  const s = norm(status);
+  if (s === 'completed') return `<span class="badge badge-green">Completed</span>`;
+  if (s === 'in progress') return `<span class="badge badge-blue">In Progress</span>`;
+  if (s === 'not started') return `<span class="badge badge-gray">Not Started</span>`;
+  if (s === 'reassigned') return `<span class="badge badge-yellow">Reassigned</span>`;
+  if (s === 'failed') return `<span class="badge badge-red">Failed</span>`;
+  if (status) return `<span class="badge badge-yellow">${esc(status)}</span>`;
+  return `<span class="badge badge-gray">—</span>`;
+}
+
+function esc(v) {
+  if (v === null || v === undefined) return '';
+  return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ============================================================
+// METRICS UPDATE
+// ============================================================
+function updateMetrics(section, rows) {
+  if (!rows) return;
+  const total = rows.length;
+  const completed = rows.filter(r => norm(r['Transcript Status']) === 'completed').length;
+  const pending = total - completed;
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  document.getElementById('m-'+section+'-total').textContent = total;
+  document.getElementById('m-'+section+'-completed').textContent = completed;
+  document.getElementById('m-'+section+'-pending').textContent = pending;
+  document.getElementById('pb-'+section).style.width = pct + '%';
+}
+
+function updateNJMetrics(njResult) {
+  const all = [...njResult['2024'], ...njResult['2025'], ...njResult['2026']];
+  updateMetrics('newJoiner', all);
+}
+
+function updateGlobalKPIs() {
+  let totalU = 0, totalC = 0, totalP = 0;
+  const sections = ['appSec','growth','newJoiner','bsc','phishingNormal','band4'];
+  sections.forEach(s => {
+    const r = state.results[s];
+    if (!r) return;
+    const rows = Array.isArray(r) ? r : [...(r['2024']||[]), ...(r['2025']||[]), ...(r['2026']||[])];
+    totalU += rows.length;
+    const c = rows.filter(x => norm(x['Transcript Status']) === 'completed').length;
+    totalC += c;
+    totalP += rows.length - c;
+  });
+  document.getElementById('kpi-total').textContent = totalU || '—';
+  document.getElementById('kpi-completed').textContent = totalC || '—';
+  document.getElementById('kpi-pending').textContent = totalP || '—';
+}
+
+// ============================================================
+// DOWNLOAD EXCEL
+// ============================================================
+function downloadSection(section) {
+  const result = state.results[section];
+  if (!result) { toast('error', 'No data to download'); return; }
+  const cfg = SECTIONS[section];
+
+  const wb = XLSX.utils.book_new();
+
+  if (section === 'newJoiner') {
+    ['2024','2025','2026'].forEach(year => {
+      const rows = result[year] || [];
+      const ws = XLSX.utils.json_to_sheet(rows.length > 0 ? rows : [{}], { header: OUTPUT_COLS });
+      styleSheet(ws);
+      XLSX.utils.book_append_sheet(wb, ws, 'New Joiners ' + year);
+    });
+  } else {
+    const ws = XLSX.utils.json_to_sheet(result.length > 0 ? result : [{}], { header: OUTPUT_COLS });
+    styleSheet(ws);
+    XLSX.utils.book_append_sheet(wb, ws, cfg.label.substring(0, 31));
+  }
+
+  XLSX.writeFile(wb, cfg.outputFile);
+  toast('success', 'Downloaded: ' + cfg.outputFile);
+}
+
+function styleSheet(ws) {
+  // Add column widths
+  const wscols = [
+    { wch: 16 }, { wch: 38 }, { wch: 18 }, { wch: 20 }, { wch: 22 }
+  ];
+  ws['!cols'] = wscols;
+}
+
+function downloadPendingAppSec() { downloadPendingSection('appSec'); }
+
+function downloadPendingSection(section) {
+  const cfg = SECTIONS[section];
+  const result = state.results[section];
+
+  if (!result) {
+    toast('error', 'No data available — please calculate first');
+    return;
+  }
+
+  // Flatten rows (newJoiner is split by year)
+  let allRows;
+  if (section === 'newJoiner') {
+    allRows = [...(result['2024'] || []), ...(result['2025'] || []), ...(result['2026'] || [])];
+  } else {
+    allRows = result;
+  }
+
+  if (!allRows || !allRows.length) {
+    toast('error', 'No data available');
+    return;
+  }
+
+  const filtered = allRows.filter(r => {
+    const status = String(r['Transcript Status'] || '').trim().toLowerCase();
+    return status !== 'completed';
+  });
+
+  if (!filtered.length) {
+    toast('info', 'No pending users — everyone has completed!');
+    return;
+  }
+
+  const cleaned = filtered.map(r => ({
+    'Employee ID': r['Employee ID'],
+    'Work Email Address': r['Work Email Address'],
+    'Transcript Status': r['Transcript Status'],
+    'Training Start Date': r['Training Start Date'],
+    'Transcript Completed Date': r['Transcript Completed Date']
+  }));
+
+  const wb = XLSX.utils.book_new();
+
+  if (section === 'newJoiner') {
+    ['2024', '2025', '2026'].forEach(year => {
+      const yearRows = (result[year] || []).filter(r => norm(r['Transcript Status']) !== 'completed');
+      if (yearRows.length > 0) {
+        const ws = XLSX.utils.json_to_sheet(yearRows);
+        styleSheet(ws);
+        XLSX.utils.book_append_sheet(wb, ws, 'Pending ' + year);
+      }
+    });
+    if (wb.SheetNames.length === 0) {
+      toast('info', 'No pending users — everyone has completed!');
+      return;
+    }
+  } else {
+    const ws = XLSX.utils.json_to_sheet(cleaned);
+    styleSheet(ws);
+    XLSX.utils.book_append_sheet(wb, ws, 'Pending Users');
+  }
+
+  const filename = cfg.outputFile.replace('.xlsx', '_Pending_Users.xlsx');
+  XLSX.writeFile(wb, filename);
+  toast('success', `Downloaded ${cleaned.length} pending users — ${filename}`);
+}
+
+// ============================================================
+// CLEAR SECTION
+// ============================================================
+function clearSection(section) {
+  delete state.files[section + '-base'];
+  delete state.files[section + '-tool'];
+  delete state.results[section];
+
+  ['base','tool'].forEach(t => {
+    const uz = document.getElementById('uz-'+section+'-'+t);
+    if (uz) { uz.classList.remove('has-file'); }
+    const fn = document.getElementById('fn-'+section+'-'+t);
+    if (fn) fn.textContent = '';
+    // Reset file inputs
+    const input = uz ? uz.querySelector('input[type=file]') : null;
+    if (input) input.value = '';
+  });
+
+  // Reset metrics
+  ['total','completed','pending'].forEach(m => {
+    const el = document.getElementById('m-'+section+'-'+m);
+    if (el) el.textContent = '—';
+  });
+  const pb = document.getElementById('pb-'+section);
+  if (pb) pb.style.width = '0%';
+  const lc = document.getElementById('lc-'+section);
+  if (lc) lc.textContent = 'No calculation yet';
+  const mc = document.getElementById('m-'+section+'-calc');
+  if (mc) mc.textContent = 'Never';
+
+  // Reset table
+  if (section === 'newJoiner') {
+    ['2024','2025','2026'].forEach(y => {
+      const t = document.getElementById('tbl-newJoiner-'+y);
+      if (t) t.innerHTML = '<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload the training status file and calculate</div></div>';
+    });
+    document.getElementById('nj-tabs').style.display = 'none';
+  } else {
+    const tbl = document.getElementById('tbl-'+section);
+    const toolOnlySection = section === 'appSec' || section === 'growth';
+    const emptyTitle = toolOnlySection
+      ? 'Upload the training status file and click Calculate'
+      : 'Upload both files and click Calculate';
+    if (tbl) {
+      tbl.innerHTML = '<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">' + emptyTitle + '</div></div>';
+    }
+  }
+
+  document.getElementById('btn-dl-'+section).disabled = true;
+  const pendingBtn = document.getElementById('btn-dl-pending-'+section);
+  if (pendingBtn) pendingBtn.disabled = true;
+  toast('info', 'Section cleared');
+  updateGlobalKPIs();
+}
+
+// ============================================================
+// PROCESS ALL
+// ============================================================
+async function processAll() {
+  const sections = ['appSec','growth','newJoiner','bsc','phishingNormal','band4'];
+  let processed = 0;
+  for (const s of sections) {
+    if (state.files[s + '-tool']) {
+      await calcSection(s);
+      processed++;
+    }
+  }
+  if (processed === 0) {
+    toast('error', 'No tool output files uploaded yet');
+  } else {
+    toast('success', `Processed ${processed} sections`);
+  }
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(type, msg) {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast toast-' + type;
+  const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => { t.remove(); }, 4000);
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+</script>
+</body>
+</html>
