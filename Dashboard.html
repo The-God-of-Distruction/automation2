@@ -454,7 +454,7 @@
           <div class="section-dot dot-blue"></div>
           <div>
             <div class="section-title">Application Security</div>
-            <div class="section-desc">Introduction to Application Security #ABI — Userbase: Application_security_userbase.xlsx</div>
+            <div class="section-desc">Introduction to Application Security #ABI — Tool output only, no base file required</div>
           </div>
         </div>
         <div class="section-controls">
@@ -485,14 +485,7 @@
         </div>
       </div>
 
-      <div class="uploads-grid">
-        <div class="upload-zone" id="uz-appSec-base" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'appSec','base')">
-          <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'appSec','base')">
-          <div class="upload-icon">📋</div>
-          <div class="upload-title">Base Userbase Excel</div>
-          <div class="upload-hint">Application_security_userbase.xlsx</div>
-          <div class="upload-filename" id="fn-appSec-base"></div>
-        </div>
+      <div class="uploads-grid" style="grid-template-columns:1fr">
         <div class="upload-zone" id="uz-appSec-tool" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'appSec','tool')">
           <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'appSec','tool')">
           <div class="upload-icon">📊</div>
@@ -515,8 +508,7 @@
       <div class="table-wrap" id="tbl-appSec">
         <div class="empty-state">
           <div class="empty-icon">📂</div>
-          <div class="empty-title">Upload both files and click Calculate</div>
-          <div>Results will appear here</div>
+          <div class="empty-title">Upload the Tool Output file and click Calculate</div>
         </div>
       </div>
     </div>
@@ -532,7 +524,7 @@
           <div class="section-dot dot-green"></div>
           <div>
             <div class="section-title">Growth Group</div>
-            <div class="section-desc">Mandatory Anti-Phishing Training — Growth Group #ABI — Userbase: Growth_Group_userbase.xlsx</div>
+            <div class="section-desc">Mandatory Anti-Phishing Training — Growth Group #ABI — Tool output only, no base file required</div>
           </div>
         </div>
         <div class="section-controls">
@@ -563,14 +555,7 @@
         </div>
       </div>
 
-      <div class="uploads-grid">
-        <div class="upload-zone" id="uz-growth-base" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'growth','base')">
-          <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'growth','base')">
-          <div class="upload-icon">📋</div>
-          <div class="upload-title">Base Userbase Excel</div>
-          <div class="upload-hint">Growth_Group_userbase.xlsx</div>
-          <div class="upload-filename" id="fn-growth-base"></div>
-        </div>
+      <div class="uploads-grid" style="grid-template-columns:1fr">
         <div class="upload-zone" id="uz-growth-tool" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'growth','tool')">
           <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'growth','tool')">
           <div class="upload-icon">📊</div>
@@ -609,7 +594,7 @@
           <div class="section-dot dot-yellow"></div>
           <div>
             <div class="section-title">New Joiner</div>
-            <div class="section-desc">IT Security Awareness — English #ABI — Outputs split by year: 2024, 2025, 2026</div>
+            <div class="section-desc">IT Security Awareness — English #ABI — Tool output only, no base file required — Output split by year: 2024, 2025, 2026</div>
           </div>
         </div>
         <div class="section-controls">
@@ -640,14 +625,7 @@
         </div>
       </div>
 
-      <div class="uploads-grid">
-        <div class="upload-zone" id="uz-newJoiner-base" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'newJoiner','base')">
-          <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'newJoiner','base')">
-          <div class="upload-icon">📋</div>
-          <div class="upload-title">Base Userbase Excel</div>
-          <div class="upload-hint">Any userbase file with Employee ID + Email + Hire Date</div>
-          <div class="upload-filename" id="fn-newJoiner-base"></div>
-        </div>
+      <div class="uploads-grid" style="grid-template-columns:1fr">
         <div class="upload-zone" id="uz-newJoiner-tool" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'newJoiner','tool')">
           <input type="file" accept=".xlsx,.xls" onchange="fileSelected(event,'newJoiner','tool')">
           <div class="upload-icon">📊</div>
@@ -1203,6 +1181,72 @@ function findMatch(map, email, empId) {
   return null;
 }
 
+/**
+ * Tool-only processor (AppSec, Growth):
+ * Reads only the tool output file — no base file needed.
+ * Deduplicates by email/ID, determines status from tool data.
+ */
+function processToolOnly(toolAB, assignDate) {
+  const toolWb = parseWorkbook(toolAB);
+  const toolSheet = toolWb.Sheets[toolWb.SheetNames[0]];
+  const toolData = detectHeaders(toolSheet);
+
+  const toolIdCol =
+    toolData.headers.find(h => /^employee.?id$/i.test(h)) ||
+    toolData.headers.find(h => /employee.?id|emp.?id/i.test(h));
+
+  const toolEmailCol =
+    toolData.headers.find(h => /work.?email|email.?address|email/i.test(h));
+
+  const toolStatusCol =
+    toolData.headers.find(h => /transcript.?status/i.test(h));
+
+  const toolStartCol =
+    toolData.headers.find(h => /training.?start/i.test(h));
+
+  const toolCompleteCol =
+    toolData.headers.find(h => /transcript.?completed|completed.?date/i.test(h));
+
+  const output = [];
+  const seen = new Set();
+
+  for (const toolRow of toolData.rows) {
+    const empId = toolRow[toolIdCol];
+    const email = toolRow[toolEmailCol];
+
+    const dedupeKey = normId(String(empId || '')) || norm(email);
+    if (dedupeKey && seen.has(dedupeKey)) continue;
+    if (dedupeKey) seen.add(dedupeKey);
+
+    const rawStatus = String(toolRow[toolStatusCol] || '').trim();
+    const startDate = fmtDate(toolRow[toolStartCol]) || (rawStatus.toLowerCase() !== 'completed' && assignDate ? assignDate : '');
+    const completedDate = fmtDate(toolRow[toolCompleteCol]);
+
+    const hasCompletedDate = completedDate && completedDate.trim() !== '';
+
+    let status;
+    if (hasCompletedDate) {
+      status = 'Completed';
+    } else if (/in progress/i.test(rawStatus)) {
+      status = 'In Progress';
+    } else if (rawStatus) {
+      status = rawStatus;
+    } else {
+      status = 'Not Started';
+    }
+
+    output.push({
+      'Employee ID': empId,
+      'Work Email Address': email,
+      'Transcript Status': status,
+      'Training Start Date': startDate,
+      'Transcript Completed Date': completedDate,
+    });
+  }
+
+  return output;
+}
+
 function processAppSec(baseAB, toolAB) {
 
   // Parse tool file — this is the authoritative source of which users to include
@@ -1445,7 +1489,7 @@ function processBSC(baseAB, toolAB, assignDate) {
  * Always iterates tool output rows only — users not present in the tool
  * file are excluded entirely (base file is not used as iteration source).
  */
-function processNewJoiner(baseAB, toolAB, assignDate) {
+function processNewJoiner(toolAB, assignDate) {
   const result = { '2024': [], '2025': [], '2026': [] };
 
   const toolWb = parseWorkbook(toolAB);
@@ -1465,7 +1509,18 @@ function processNewJoiner(baseAB, toolAB, assignDate) {
     const empId = toolRow[toolIdCol];
     const email = toolRow[toolEmailCol];
 
-    const dedupeKey = norm(email) || normId(String(empId || ''));
+    // Determine year bucket FIRST — so dedup key is scoped per year.
+    // Same employee can have one row per year (2024, 2025, 2026 assignments).
+    let year = new Date().getFullYear().toString();
+    const sd = toolRow[toolStartCol];
+    if (sd) {
+      const d = sd instanceof Date ? sd : new Date(sd);
+      if (!isNaN(d.getTime())) year = String(d.getFullYear());
+    }
+
+    // Dedup within same year only — allow same person across different years
+    const baseKey = norm(email) || normId(String(empId || ''));
+    const dedupeKey = baseKey ? baseKey + '|' + year : null;
     if (dedupeKey && seen.has(dedupeKey)) continue;
     if (dedupeKey) seen.add(dedupeKey);
 
@@ -1483,14 +1538,6 @@ function processNewJoiner(baseAB, toolAB, assignDate) {
       status = rawStatus;
     } else {
       status = 'Not Started';
-    }
-
-    // Determine year bucket from Training Start Date
-    let year = new Date().getFullYear().toString();
-    const sd = toolRow[toolStartCol];
-    if (sd) {
-      const d = sd instanceof Date ? sd : new Date(sd);
-      if (!isNaN(d.getTime())) year = String(d.getFullYear());
     }
 
     const outRow = {
@@ -1535,10 +1582,23 @@ async function calcSection(section) {
 
     let rows;
     if (section === 'newJoiner') {
-      const njResult = processNewJoiner(baseAB, toolAB, assignDate);
+      // Tool-only: no base file required
+      const njResult = processNewJoiner(toolAB, assignDate);
       state.results[section] = njResult;
       renderNewJoinerTables(njResult);
       updateNJMetrics(njResult);
+    } else if (section === 'appSec') {
+      // Tool-only: no base file required
+      rows = processToolOnly(toolAB, assignDate);
+      state.results[section] = rows;
+      renderTable(section, rows);
+      updateMetrics(section, rows);
+    } else if (section === 'growth') {
+      // Tool-only: no base file required
+      rows = processToolOnly(toolAB, assignDate);
+      state.results[section] = rows;
+      renderTable(section, rows);
+      updateMetrics(section, rows);
     } else if (section === 'bsc') {
       if (!baseAB) { toast('error', 'Please upload the Base Userbase Excel'); btn.innerHTML = origText; btn.disabled = false; return; }
       rows = processBSC(baseAB, toolAB, assignDate);
@@ -1557,27 +1617,7 @@ async function calcSection(section) {
       state.results[section] = rows;
       renderTable(section, rows);
       updateMetrics(section, rows);
-    } else {
-    // APP SECURITY — tool-only processing (no base file required)
-    if (section === 'appSec') {
-        rows = processAppSec(null, toolAB);
-    } else {
-        // GROWTH and any other sections — require base file
-        if (!baseAB) {
-          toast('error', 'Please upload the Base Userbase Excel');
-          btn.innerHTML = origText;
-          btn.disabled = false;
-          return;
-        }
-        rows = processSection(section, baseAB, toolAB, assignDate, null);
     }
-
-    state.results[section] = rows;
-
-    renderTable(section, rows);
-
-    updateMetrics(section, rows);
-}
 
     const now = new Date();
     const ts = now.toLocaleTimeString('en-GB');
@@ -1815,11 +1855,15 @@ function downloadPendingSection(section) {
 // CLEAR SECTION
 // ============================================================
 function clearSection(section) {
+  // These sections are tool-only — no base file
+  const toolOnlySections = ['appSec', 'growth', 'newJoiner'];
+  const typesToClear = toolOnlySections.includes(section) ? ['tool'] : ['base', 'tool'];
+
   delete state.files[section + '-base'];
   delete state.files[section + '-tool'];
   delete state.results[section];
 
-  ['base','tool'].forEach(t => {
+  typesToClear.forEach(t => {
     const uz = document.getElementById('uz-'+section+'-'+t);
     if (uz) { uz.classList.remove('has-file'); }
     const fn = document.getElementById('fn-'+section+'-'+t);
