@@ -1008,7 +1008,7 @@ const SECTIONS = {
     baseIdCol: 'Local Employee ID',
     baseEmailCol: 'Employee Email',
     // tool file header row index (0-based): row 21 (index 20)
-    toolHeaderRow: 21,
+    toolHeaderRow: 20,
     // for phishing filter: null = no filter
     phishingFilter: null,
     outputFile: 'AppSec_Output.xlsx',
@@ -1019,7 +1019,7 @@ const SECTIONS = {
     baseType: 'growth',
     baseIdCol: 'Local Employee ID',
     baseEmailCol: 'Employee Email',
-    toolHeaderRow: 21,
+    toolHeaderRow: 20,
     phishingFilter: null,
     outputFile: 'Growth_Output.xlsx',
   },
@@ -1029,7 +1029,7 @@ const SECTIONS = {
     baseType: 'newJoiner',
     baseIdCol: null, // dynamic
     baseEmailCol: null,
-    toolHeaderRow: 21,
+    toolHeaderRow: 20,
     phishingFilter: null,
     outputFile: 'NewJoiner_Output.xlsx',
   },
@@ -1039,7 +1039,7 @@ const SECTIONS = {
     baseType: 'bsc',
     baseIdCol: 'Emp ID',
     baseEmailCol: 'Email - Primary Work',
-    toolHeaderRow: 21,
+    toolHeaderRow: 20,
     phishingFilter: null,
     outputFile: 'BSC_Output.xlsx',
   },
@@ -1049,7 +1049,7 @@ const SECTIONS = {
     baseType: 'phishingNormal',
     baseIdCol: 'Local Employee ID',
     baseEmailCol: 'Employee Email',
-    toolHeaderRow: 21,
+    toolHeaderRow: 20,
     phishingFilter: null, // all non-band4+ users (or all)
     outputFile: 'Phishing_Normal_Output.xlsx',
   },
@@ -1059,7 +1059,7 @@ const SECTIONS = {
     baseType: 'band4',
     baseIdCol: 'Local Employee ID',
     baseEmailCol: 'Employee Email',
-    toolHeaderRow: 21,
+    toolHeaderRow: 20,
     phishingFilter: 'band4plus', // filter Band 4+ = Yes
     outputFile: 'Band4Plus_Output.xlsx',
   },
@@ -1529,9 +1529,16 @@ function processSection(section, baseAB, toolAB, assignDate, filterFn) {
 }
 
 /**
- * BSC-specific processor: handles reassignment logic
- * - Existing incomplete: keep single, do not duplicate
- * - Completed: allow new assignment
+ * BSC-specific processor: handles Annual Training + BSC/phishing assignment logic.
+ *
+ * Rules:
+ * 1. A user may appear multiple times in the tool file (annual training row + phishing row).
+ * 2. Group all rows per user first, then apply priority:
+ *    a. If annual training exists and is NOT completed → keep it as-is; skip phishing duplicate.
+ *    b. If annual training IS completed → treat phishing row as new BSC assignment;
+ *       use phishing assignDate (not original annual start date) as Training Start Date.
+ * 3. BSC aging starts from phishing start date, not annual training date.
+ * 4. No duplicate pending entries — one output row per user.
  */
 function processBSC(baseAB, toolAB, assignDate) {
   const baseWb = parseWorkbook(baseAB);
@@ -1552,50 +1559,100 @@ function processBSC(baseAB, toolAB, assignDate) {
   const toolCompleteCol = toolData.headers.find(h => /transcript.?completed|completed.?date/i.test(h)) || 'Transcript Completed Date';
   const toolZoneCol = toolData.headers.find(h => /macro.?entity.?level.?2|zone/i.test(h));
 
-  const toolMap = buildLookupMap(toolData.rows, toolEmailCol, toolIdCol);
   const baseMap = buildLookupMap(baseData.rows, baseEmailCol, baseIdCol);
 
-  const output = [];
-  const seen = new Set();
-
-  // Iterate ONLY over tool output rows — users not in the tool file are excluded entirely
+  // BSC PATCH: Group all tool rows by user key (email or empId).
+  // A user can have multiple rows (annual training + phishing-triggered).
+  const userRowsMap = new Map();
   for (const toolRow of toolData.rows) {
     const empId = toolRow[toolIdCol];
     const email = toolRow[toolEmailCol];
+    const key = norm(email) || normId(String(empId || ''));
+    if (!key) continue;
+    if (!userRowsMap.has(key)) userRowsMap.set(key, []);
+    userRowsMap.get(key).push(toolRow);
+  }
 
-    const dedupeKey = norm(email) || normId(String(empId || ''));
-    if (dedupeKey && seen.has(dedupeKey)) continue;
-    if (dedupeKey) seen.add(dedupeKey);
+  const output = [];
 
-    const existingStatus = String(toolRow[toolStatusCol] || '').trim();
-    const existingStartDate = fmtDate(toolRow[toolStartCol]);
-    const zone = toolZoneCol ? (toolRow[toolZoneCol] || '') : '';
+  for (const [key, rows] of userRowsMap) {
+    // Use first row for identity fields (empId, email, zone)
+    const firstRow = rows[0];
+    const empId = firstRow[toolIdCol];
+    const email = firstRow[toolEmailCol];
+    const zone = toolZoneCol ? (firstRow[toolZoneCol] || '') : '';
 
-    let status = 'Not Started';
-    let startDate = assignDate || '';
-    let completedDate = '';
-    let needsNewAssignment = false;
+    let status, startDate, completedDate;
 
-    if (norm(existingStatus) === 'completed') {
-      status = 'Completed';
-      startDate = existingStartDate;
-      completedDate = fmtDate(toolRow[toolCompleteCol]);
-      needsNewAssignment = true;
-    } else if (existingStatus) {
-      status = existingStatus;
-      startDate = existingStartDate;
+    if (rows.length === 1) {
+      // Single row — original behaviour preserved exactly
+      const existingStatus = String(rows[0][toolStatusCol] || '').trim();
+      const existingStartDate = fmtDate(rows[0][toolStartCol]);
       completedDate = '';
-      needsNewAssignment = false;
-    }
+      let needsNewAssignment = false;
 
-    // Reassignment date comparison
-    if (needsNewAssignment && assignDate && existingStartDate) {
-      const newD = new Date(assignDate);
-      const exD = new Date(existingStartDate.split('/').reverse().join('-'));
-      if (!isNaN(newD) && !isNaN(exD) && newD > exD) {
-        status = 'Reassigned';
-        startDate = assignDate;
+      if (norm(existingStatus) === 'completed') {
+        status = 'Completed';
+        startDate = existingStartDate;
+        completedDate = fmtDate(rows[0][toolCompleteCol]);
+        needsNewAssignment = true;
+      } else if (existingStatus) {
+        status = existingStatus;
+        startDate = existingStartDate;
+        needsNewAssignment = false;
+      } else {
+        status = 'Not Started';
+        startDate = assignDate || '';
+        needsNewAssignment = false;
+      }
+
+      // Reassignment date comparison (original logic)
+      if (needsNewAssignment && assignDate && existingStartDate) {
+        const newD = new Date(assignDate);
+        const exD = new Date(existingStartDate.split('/').reverse().join('-'));
+        if (!isNaN(newD) && !isNaN(exD) && newD > exD) {
+          status = 'Reassigned';
+          startDate = assignDate;
+          completedDate = '';
+        }
+      }
+
+    } else {
+      // BSC PATCH: Multiple rows for same user — annual + phishing rows present.
+      // Identify the annual training row as the one with the EARLIEST start date.
+      // The phishing-triggered row is the one with the LATEST start date (or matching assignDate).
+      const sorted = rows.slice().sort((a, b) => {
+        const da = new Date((fmtDate(a[toolStartCol]) || '').split('/').reverse().join('-'));
+        const db = new Date((fmtDate(b[toolStartCol]) || '').split('/').reverse().join('-'));
+        return (isNaN(da) ? Infinity : da) - (isNaN(db) ? Infinity : db);
+      });
+
+      const annualRow = sorted[0];  // earliest = annual training
+      const phishRow = sorted[sorted.length - 1];  // latest = phishing-triggered
+
+      const annualStatus = norm(String(annualRow[toolStatusCol] || '').trim());
+
+      if (annualStatus !== 'completed') {
+        // Rule 2a: Annual training is incomplete → keep it as-is, discard phishing duplicate
+        status = String(annualRow[toolStatusCol] || '').trim() || 'Not Started';
+        startDate = fmtDate(annualRow[toolStartCol]) || assignDate || '';
         completedDate = '';
+      } else {
+        // Rule 2b: Annual training is completed → phishing triggers new BSC assignment.
+        // BSC aging starts from phishing start date (assignDate), not annual start date.
+        const phishStartDate = fmtDate(phishRow[toolStartCol]) || assignDate || '';
+        const phishStatus = norm(String(phishRow[toolStatusCol] || '').trim());
+
+        if (phishStatus === 'completed') {
+          status = 'Completed';
+          startDate = phishStartDate;
+          completedDate = fmtDate(phishRow[toolCompleteCol]);
+        } else {
+          // New BSC assignment: use assignDate as start date for aging calculation
+          status = 'Reassigned';
+          startDate = assignDate || phishStartDate;
+          completedDate = '';
+        }
       }
     }
 
