@@ -499,16 +499,32 @@
         <div class="last-calc" id="lc-appSec">No calculation yet</div>
         <div class="btns-group">
           <button class="btn btn-primary" id="btn-calc-appSec" onclick="calcSection('appSec')">▶ Calculate</button>
-          <button class="btn btn-success" id="btn-dl-appSec" onclick="downloadSection('appSec')" disabled>⬇ Download Excel</button>
+          <button class="btn btn-success" id="btn-dl-appSec" onclick="downloadSection('appSec')" disabled>⬇ Download Excel (3 sheets)</button>
           <button class="btn btn-ghost" id="btn-dl-pending-appSec" onclick="downloadPendingSection('appSec')" disabled>⚠ Download Pending Users</button>
           <button class="btn btn-ghost" onclick="clearSection('appSec')">✕ Clear</button>
         </div>
       </div>
 
-      <div class="table-wrap" id="tbl-appSec">
-        <div class="empty-state">
-          <div class="empty-icon">📂</div>
-          <div class="empty-title">Upload the Tool Output file and click Calculate</div>
+      <!-- Year sub-tabs -->
+      <div class="sheet-tabs" id="appSec-year-tabs" style="display:none">
+        <button class="sheet-tab active" onclick="switchYearTab('appSec','2024')">2024</button>
+        <button class="sheet-tab" onclick="switchYearTab('appSec','2025')">2025</button>
+        <button class="sheet-tab" onclick="switchYearTab('appSec','2026')">2026</button>
+      </div>
+
+      <div class="sheet-content active" id="appSec-sheet-2024">
+        <div class="table-wrap" id="tbl-appSec-2024">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload the Tool Output file and click Calculate</div></div>
+        </div>
+      </div>
+      <div class="sheet-content" id="appSec-sheet-2025">
+        <div class="table-wrap" id="tbl-appSec-2025">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload files and calculate</div></div>
+        </div>
+      </div>
+      <div class="sheet-content" id="appSec-sheet-2026">
+        <div class="table-wrap" id="tbl-appSec-2026">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload files and calculate</div></div>
         </div>
       </div>
     </div>
@@ -569,16 +585,32 @@
         <div class="last-calc" id="lc-growth">No calculation yet</div>
         <div class="btns-group">
           <button class="btn btn-primary" id="btn-calc-growth" onclick="calcSection('growth')">▶ Calculate</button>
-          <button class="btn btn-success" id="btn-dl-growth" onclick="downloadSection('growth')" disabled>⬇ Download Excel</button>
+          <button class="btn btn-success" id="btn-dl-growth" onclick="downloadSection('growth')" disabled>⬇ Download Excel (3 sheets)</button>
           <button class="btn btn-ghost" id="btn-dl-pending-growth" onclick="downloadPendingSection('growth')" disabled>⚠ Download Pending Users</button>
           <button class="btn btn-ghost" onclick="clearSection('growth')">✕ Clear</button>
         </div>
       </div>
 
-      <div class="table-wrap" id="tbl-growth">
-        <div class="empty-state">
-          <div class="empty-icon">📂</div>
-          <div class="empty-title">Upload both files and click Calculate</div>
+      <!-- Year sub-tabs -->
+      <div class="sheet-tabs" id="growth-year-tabs" style="display:none">
+        <button class="sheet-tab active" onclick="switchYearTab('growth','2024')">2024</button>
+        <button class="sheet-tab" onclick="switchYearTab('growth','2025')">2025</button>
+        <button class="sheet-tab" onclick="switchYearTab('growth','2026')">2026</button>
+      </div>
+
+      <div class="sheet-content active" id="growth-sheet-2024">
+        <div class="table-wrap" id="tbl-growth-2024">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload both files and click Calculate</div></div>
+        </div>
+      </div>
+      <div class="sheet-content" id="growth-sheet-2025">
+        <div class="table-wrap" id="tbl-growth-2025">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload files and calculate</div></div>
+        </div>
+      </div>
+      <div class="sheet-content" id="growth-sheet-2026">
+        <div class="table-wrap" id="tbl-growth-2026">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload files and calculate</div></div>
         </div>
       </div>
     </div>
@@ -732,16 +764,32 @@
         <div class="last-calc" id="lc-bsc">No calculation yet</div>
         <div class="btns-group">
           <button class="btn btn-primary" id="btn-calc-bsc" onclick="calcSection('bsc')">▶ Calculate</button>
-          <button class="btn btn-success" id="btn-dl-bsc" onclick="downloadSection('bsc')" disabled>⬇ Download Excel</button>
+          <button class="btn btn-success" id="btn-dl-bsc" onclick="downloadSection('bsc')" disabled>⬇ Download Excel (3 sheets)</button>
           <button class="btn btn-ghost" id="btn-dl-pending-bsc" onclick="downloadPendingSection('bsc')" disabled>⚠ Download Pending Users</button>
           <button class="btn btn-ghost" onclick="clearSection('bsc')">✕ Clear</button>
         </div>
       </div>
 
-      <div class="table-wrap" id="tbl-bsc">
-        <div class="empty-state">
-          <div class="empty-icon">📂</div>
-          <div class="empty-title">Upload both files and click Calculate</div>
+      <!-- Year sub-tabs -->
+      <div class="sheet-tabs" id="bsc-year-tabs" style="display:none">
+        <button class="sheet-tab active" onclick="switchYearTab('bsc','2024')">2024</button>
+        <button class="sheet-tab" onclick="switchYearTab('bsc','2025')">2025</button>
+        <button class="sheet-tab" onclick="switchYearTab('bsc','2026')">2026</button>
+      </div>
+
+      <div class="sheet-content active" id="bsc-sheet-2024">
+        <div class="table-wrap" id="tbl-bsc-2024">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload both files and click Calculate</div></div>
+        </div>
+      </div>
+      <div class="sheet-content" id="bsc-sheet-2025">
+        <div class="table-wrap" id="tbl-bsc-2025">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload files and calculate</div></div>
+        </div>
+      </div>
+      <div class="sheet-content" id="bsc-sheet-2026">
+        <div class="table-wrap" id="tbl-bsc-2026">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload files and calculate</div></div>
         </div>
       </div>
     </div>
@@ -809,16 +857,32 @@
         <div class="last-calc" id="lc-phishingNormal">No calculation yet</div>
         <div class="btns-group">
           <button class="btn btn-primary" id="btn-calc-phishingNormal" onclick="calcSection('phishingNormal')">▶ Calculate</button>
-          <button class="btn btn-success" id="btn-dl-phishingNormal" onclick="downloadSection('phishingNormal')" disabled>⬇ Download Excel</button>
+          <button class="btn btn-success" id="btn-dl-phishingNormal" onclick="downloadSection('phishingNormal')" disabled>⬇ Download Excel (3 sheets)</button>
           <button class="btn btn-ghost" id="btn-dl-pending-phishingNormal" onclick="downloadPendingSection('phishingNormal')" disabled>⚠ Download Pending Users</button>
           <button class="btn btn-ghost" onclick="clearSection('phishingNormal')">✕ Clear</button>
         </div>
       </div>
 
-      <div class="table-wrap" id="tbl-phishingNormal">
-        <div class="empty-state">
-          <div class="empty-icon">📂</div>
-          <div class="empty-title">Upload both files and click Calculate</div>
+      <!-- Year sub-tabs -->
+      <div class="sheet-tabs" id="phishingNormal-year-tabs" style="display:none">
+        <button class="sheet-tab active" onclick="switchYearTab('phishingNormal','2024')">2024</button>
+        <button class="sheet-tab" onclick="switchYearTab('phishingNormal','2025')">2025</button>
+        <button class="sheet-tab" onclick="switchYearTab('phishingNormal','2026')">2026</button>
+      </div>
+
+      <div class="sheet-content active" id="phishingNormal-sheet-2024">
+        <div class="table-wrap" id="tbl-phishingNormal-2024">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload both files and click Calculate</div></div>
+        </div>
+      </div>
+      <div class="sheet-content" id="phishingNormal-sheet-2025">
+        <div class="table-wrap" id="tbl-phishingNormal-2025">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload files and calculate</div></div>
+        </div>
+      </div>
+      <div class="sheet-content" id="phishingNormal-sheet-2026">
+        <div class="table-wrap" id="tbl-phishingNormal-2026">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload files and calculate</div></div>
         </div>
       </div>
     </div>
@@ -886,16 +950,32 @@
         <div class="last-calc" id="lc-band4">No calculation yet</div>
         <div class="btns-group">
           <button class="btn btn-primary" id="btn-calc-band4" onclick="calcSection('band4')">▶ Calculate</button>
-          <button class="btn btn-success" id="btn-dl-band4" onclick="downloadSection('band4')" disabled>⬇ Download Excel</button>
+          <button class="btn btn-success" id="btn-dl-band4" onclick="downloadSection('band4')" disabled>⬇ Download Excel (3 sheets)</button>
           <button class="btn btn-ghost" id="btn-dl-pending-band4" onclick="downloadPendingSection('band4')" disabled>⚠ Download Pending Users</button>
           <button class="btn btn-ghost" onclick="clearSection('band4')">✕ Clear</button>
         </div>
       </div>
 
-      <div class="table-wrap" id="tbl-band4">
-        <div class="empty-state">
-          <div class="empty-icon">📂</div>
-          <div class="empty-title">Upload both files and click Calculate</div>
+      <!-- Year sub-tabs -->
+      <div class="sheet-tabs" id="band4-year-tabs" style="display:none">
+        <button class="sheet-tab active" onclick="switchYearTab('band4','2024')">2024</button>
+        <button class="sheet-tab" onclick="switchYearTab('band4','2025')">2025</button>
+        <button class="sheet-tab" onclick="switchYearTab('band4','2026')">2026</button>
+      </div>
+
+      <div class="sheet-content active" id="band4-sheet-2024">
+        <div class="table-wrap" id="tbl-band4-2024">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload both files and click Calculate</div></div>
+        </div>
+      </div>
+      <div class="sheet-content" id="band4-sheet-2025">
+        <div class="table-wrap" id="tbl-band4-2025">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload files and calculate</div></div>
+        </div>
+      </div>
+      <div class="sheet-content" id="band4-sheet-2026">
+        <div class="table-wrap" id="tbl-band4-2026">
+          <div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload files and calculate</div></div>
         </div>
       </div>
     </div>
@@ -985,7 +1065,7 @@ const SECTIONS = {
   },
 };
 
-const OUTPUT_COLS = ['Employee ID', 'Work Email Address', 'Transcript Status', 'Training Start Date', 'Transcript Completed Date'];
+const OUTPUT_COLS = ['Employee ID', 'Work Email Address', 'Macro Entity Level 2 (Zone)', 'Transcript Status', 'Training Start Date', 'Transcript Completed Date'];
 
 // ============================================================
 // CLOCK
@@ -1021,6 +1101,38 @@ function switchNJTab(year) {
   document.querySelectorAll('#panel-newJoiner .sheet-content').forEach(c => c.classList.remove('active'));
   event.target.classList.add('active');
   document.getElementById('nj-sheet-'+year).classList.add('active');
+}
+
+function switchYearTab(section, year) {
+  document.querySelectorAll('#panel-'+section+' .sheet-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#panel-'+section+' .sheet-content').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById(section+'-sheet-'+year).classList.add('active');
+}
+
+/**
+ * Split a flat array of rows into { '2024': [], '2025': [], '2026': [] }
+ * using the Training Start Date field to determine the year.
+ */
+function splitRowsByYear(rows) {
+  const result = { '2024': [], '2025': [], '2026': [] };
+  for (const row of rows) {
+    const sd = row['Training Start Date'];
+    let year = new Date().getFullYear().toString();
+    if (sd) {
+      // SD is already formatted as DD/MM/YYYY string
+      const parts = String(sd).split('/');
+      if (parts.length === 3 && parts[2]) {
+        year = parts[2];
+      } else {
+        const d = new Date(sd);
+        if (!isNaN(d.getTime())) year = String(d.getFullYear());
+      }
+    }
+    if (result[year]) result[year].push(row);
+    else result['2026'].push(row);
+  }
+  return result;
 }
 
 // ============================================================
@@ -1207,6 +1319,9 @@ function processToolOnly(toolAB, assignDate) {
   const toolCompleteCol =
     toolData.headers.find(h => /transcript.?completed|completed.?date/i.test(h));
 
+  const toolZoneCol =
+    toolData.headers.find(h => /macro.?entity.?level.?2|zone/i.test(h));
+
   const output = [];
   const seen = new Set();
 
@@ -1221,6 +1336,7 @@ function processToolOnly(toolAB, assignDate) {
     const rawStatus = String(toolRow[toolStatusCol] || '').trim();
     const startDate = fmtDate(toolRow[toolStartCol]) || (rawStatus.toLowerCase() !== 'completed' && assignDate ? assignDate : '');
     const completedDate = fmtDate(toolRow[toolCompleteCol]);
+    const zone = toolZoneCol ? (toolRow[toolZoneCol] || '') : '';
 
     const hasCompletedDate = completedDate && completedDate.trim() !== '';
 
@@ -1238,6 +1354,7 @@ function processToolOnly(toolAB, assignDate) {
     output.push({
       'Employee ID': empId,
       'Work Email Address': email,
+      'Macro Entity Level 2 (Zone)': zone,
       'Transcript Status': status,
       'Training Start Date': startDate,
       'Transcript Completed Date': completedDate,
@@ -1271,6 +1388,9 @@ function processAppSec(baseAB, toolAB) {
   const toolCompleteCol =
     toolData.headers.find(h => /transcript.?completed|completed.?date/i.test(h));
 
+  const toolZoneCol =
+    toolData.headers.find(h => /macro.?entity.?level.?2|zone/i.test(h));
+
   const output = [];
   const seen = new Set();
 
@@ -1288,6 +1408,7 @@ function processAppSec(baseAB, toolAB) {
     const rawStatus = String(toolRow[toolStatusCol] || '').trim();
     const startDate = fmtDate(toolRow[toolStartCol]);
     const completedDate = fmtDate(toolRow[toolCompleteCol]);
+    const zone = toolZoneCol ? (toolRow[toolZoneCol] || '') : '';
 
     const hasCompletedDate = completedDate && completedDate.trim() !== '';
 
@@ -1305,6 +1426,7 @@ function processAppSec(baseAB, toolAB) {
     output.push({
       'Employee ID': empId,
       'Work Email Address': email,
+      'Macro Entity Level 2 (Zone)': zone,
       'Transcript Status': status,
       'Training Start Date': startDate,
       'Transcript Completed Date': completedDate
@@ -1360,6 +1482,7 @@ function processSection(section, baseAB, toolAB, assignDate, filterFn) {
   const toolStatusCol = toolData.headers.find(h => /transcript.?status/i.test(h)) || 'Transcript Status';
   const toolStartCol = toolData.headers.find(h => /training.?start/i.test(h)) || 'Training Start Date';
   const toolCompleteCol = toolData.headers.find(h => /transcript.?completed|completed.?date/i.test(h)) || 'Transcript Completed Date';
+  const toolZoneCol = toolData.headers.find(h => /macro.?entity.?level.?2|zone/i.test(h));
 
   // Build base lookup (used to enrich tool rows with base data if needed)
   const baseMap = buildLookupMap(baseRows, baseEmailCol, baseIdCol);
@@ -1380,6 +1503,7 @@ function processSection(section, baseAB, toolAB, assignDate, filterFn) {
     const rawStatus = String(toolRow[toolStatusCol] || '').trim();
     const startDate = fmtDate(toolRow[toolStartCol]) || (rawStatus !== 'Completed' && assignDate ? assignDate : '');
     const completedDate = fmtDate(toolRow[toolCompleteCol]);
+    const zone = toolZoneCol ? (toolRow[toolZoneCol] || '') : '';
 
     const hasCompletedDate = completedDate && completedDate.trim() !== '';
     let status;
@@ -1394,6 +1518,7 @@ function processSection(section, baseAB, toolAB, assignDate, filterFn) {
     output.push({
       'Employee ID': empId,
       'Work Email Address': email,
+      'Macro Entity Level 2 (Zone)': zone,
       'Transcript Status': status,
       'Training Start Date': startDate,
       'Transcript Completed Date': completedDate,
@@ -1425,6 +1550,7 @@ function processBSC(baseAB, toolAB, assignDate) {
   const toolStatusCol = toolData.headers.find(h => /transcript.?status/i.test(h)) || 'Transcript Status';
   const toolStartCol = toolData.headers.find(h => /training.?start/i.test(h)) || 'Training Start Date';
   const toolCompleteCol = toolData.headers.find(h => /transcript.?completed|completed.?date/i.test(h)) || 'Transcript Completed Date';
+  const toolZoneCol = toolData.headers.find(h => /macro.?entity.?level.?2|zone/i.test(h));
 
   const toolMap = buildLookupMap(toolData.rows, toolEmailCol, toolIdCol);
   const baseMap = buildLookupMap(baseData.rows, baseEmailCol, baseIdCol);
@@ -1443,6 +1569,7 @@ function processBSC(baseAB, toolAB, assignDate) {
 
     const existingStatus = String(toolRow[toolStatusCol] || '').trim();
     const existingStartDate = fmtDate(toolRow[toolStartCol]);
+    const zone = toolZoneCol ? (toolRow[toolZoneCol] || '') : '';
 
     let status = 'Not Started';
     let startDate = assignDate || '';
@@ -1475,6 +1602,7 @@ function processBSC(baseAB, toolAB, assignDate) {
     output.push({
       'Employee ID': empId,
       'Work Email Address': email,
+      'Macro Entity Level 2 (Zone)': zone,
       'Transcript Status': status,
       'Training Start Date': startDate,
       'Transcript Completed Date': completedDate,
@@ -1501,6 +1629,7 @@ function processNewJoiner(toolAB, assignDate) {
   const toolStatusCol = toolData.headers.find(h => /transcript.?status/i.test(h)) || 'Transcript Status';
   const toolStartCol = toolData.headers.find(h => /training.?start/i.test(h)) || 'Training Start Date';
   const toolCompleteCol = toolData.headers.find(h => /transcript.?completed|completed.?date/i.test(h)) || 'Transcript Completed Date';
+  const toolZoneCol = toolData.headers.find(h => /macro.?entity.?level.?2|zone/i.test(h));
 
   const seen = new Set();
 
@@ -1527,6 +1656,7 @@ function processNewJoiner(toolAB, assignDate) {
     const rawStatus = String(toolRow[toolStatusCol] || '').trim();
     const startDate = fmtDate(toolRow[toolStartCol]);
     const completedDate = fmtDate(toolRow[toolCompleteCol]);
+    const zone = toolZoneCol ? (toolRow[toolZoneCol] || '') : '';
 
     const hasCompletedDate = completedDate && completedDate.trim() !== '';
     let status;
@@ -1543,6 +1673,7 @@ function processNewJoiner(toolAB, assignDate) {
     const outRow = {
       'Employee ID': empId,
       'Work Email Address': email,
+      'Macro Entity Level 2 (Zone)': zone,
       'Transcript Status': status,
       'Training Start Date': startDate,
       'Transcript Completed Date': completedDate,
@@ -1590,32 +1721,37 @@ async function calcSection(section) {
     } else if (section === 'appSec') {
       // Tool-only: no base file required
       rows = processToolOnly(toolAB, assignDate);
-      state.results[section] = rows;
-      renderTable(section, rows);
+      const yearResult = splitRowsByYear(rows);
+      state.results[section] = yearResult;
+      renderYearTables(section, yearResult);
       updateMetrics(section, rows);
     } else if (section === 'growth') {
       // Tool-only: no base file required
       rows = processToolOnly(toolAB, assignDate);
-      state.results[section] = rows;
-      renderTable(section, rows);
+      const yearResult = splitRowsByYear(rows);
+      state.results[section] = yearResult;
+      renderYearTables(section, yearResult);
       updateMetrics(section, rows);
     } else if (section === 'bsc') {
       if (!baseAB) { toast('error', 'Please upload the Base Userbase Excel'); btn.innerHTML = origText; btn.disabled = false; return; }
       rows = processBSC(baseAB, toolAB, assignDate);
-      state.results[section] = rows;
-      renderTable(section, rows);
+      const yearResult = splitRowsByYear(rows);
+      state.results[section] = yearResult;
+      renderYearTables(section, yearResult);
       updateMetrics(section, rows);
     } else if (section === 'band4') {
       if (!baseAB) { toast('error', 'Please upload the Phishing Tracking Input Excel'); btn.innerHTML = origText; btn.disabled = false; return; }
       rows = processSection(section, baseAB, toolAB, assignDate, r => norm(r['Band 4+'] || r['band 4+'] || '') === 'yes');
-      state.results[section] = rows;
-      renderTable(section, rows);
+      const yearResult = splitRowsByYear(rows);
+      state.results[section] = yearResult;
+      renderYearTables(section, yearResult);
       updateMetrics(section, rows);
     } else if (section === 'phishingNormal') {
       if (!baseAB) { toast('error', 'Please upload the Phishing Tracking Input Excel'); btn.innerHTML = origText; btn.disabled = false; return; }
       rows = processSection(section, baseAB, toolAB, assignDate, null);
-      state.results[section] = rows;
-      renderTable(section, rows);
+      const yearResult = splitRowsByYear(rows);
+      state.results[section] = yearResult;
+      renderYearTables(section, yearResult);
       updateMetrics(section, rows);
     }
 
@@ -1658,6 +1794,7 @@ function renderTable(section, rows) {
         <th>#</th>
         <th>Employee ID</th>
         <th>Work Email Address</th>
+        <th>Zone</th>
         <th>Transcript Status</th>
         <th>Training Start Date</th>
         <th>Transcript Completed Date</th>
@@ -1674,6 +1811,7 @@ function renderTable(section, rows) {
       <td class="mono" style="color:var(--text3)">${i+1}</td>
       <td class="mono">${esc(row['Employee ID'])}</td>
       <td style="color:var(--text)">${esc(row['Work Email Address'])}</td>
+      <td class="mono" style="color:var(--text2)">${esc(row['Macro Entity Level 2 (Zone)'])}</td>
       <td>${statusBadge}</td>
       <td class="mono">${esc(row['Training Start Date'])}</td>
       <td class="mono">${esc(row['Transcript Completed Date'])}</td>
@@ -1681,7 +1819,7 @@ function renderTable(section, rows) {
   });
 
   if (rows.length > 200) {
-    html += `<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:12px;font-style:italic">... and ${rows.length - 200} more rows (all included in export)</td></tr>`;
+    html += `<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:12px;font-style:italic">... and ${rows.length - 200} more rows (all included in export)</td></tr>`;
   }
   html += '</tbody></table>';
   container.innerHTML = html;
@@ -1692,6 +1830,13 @@ function renderNewJoinerTables(njResult) {
     renderTable('newJoiner-' + year, njResult[year]);
   });
   document.getElementById('nj-tabs').style.display = 'flex';
+}
+
+function renderYearTables(section, yearResult) {
+  ['2024','2025','2026'].forEach(year => {
+    renderTable(section + '-' + year, yearResult[year]);
+  });
+  document.getElementById(section + '-year-tabs').style.display = 'flex';
 }
 
 function getStatusBadge(status) {
@@ -1737,7 +1882,7 @@ function updateGlobalKPIs() {
   sections.forEach(s => {
     const r = state.results[s];
     if (!r) return;
-    const rows = Array.isArray(r) ? r : [...(r['2024']||[]), ...(r['2025']||[]), ...(r['2026']||[])];
+    const rows = [...(r['2024']||[]), ...(r['2025']||[]), ...(r['2026']||[])];
     totalU += rows.length;
     const c = rows.filter(x => norm(x['Transcript Status']) === 'completed').length;
     totalC += c;
@@ -1758,18 +1903,13 @@ function downloadSection(section) {
 
   const wb = XLSX.utils.book_new();
 
-  if (section === 'newJoiner') {
-    ['2024','2025','2026'].forEach(year => {
-      const rows = result[year] || [];
-      const ws = XLSX.utils.json_to_sheet(rows.length > 0 ? rows : [{}], { header: OUTPUT_COLS });
-      styleSheet(ws);
-      XLSX.utils.book_append_sheet(wb, ws, 'New Joiners ' + year);
-    });
-  } else {
-    const ws = XLSX.utils.json_to_sheet(result.length > 0 ? result : [{}], { header: OUTPUT_COLS });
+  const yearLabel = section === 'newJoiner' ? 'New Joiners' : cfg.label.substring(0, 20);
+  ['2024','2025','2026'].forEach(year => {
+    const rows = result[year] || [];
+    const ws = XLSX.utils.json_to_sheet(rows.length > 0 ? rows : [{}], { header: OUTPUT_COLS });
     styleSheet(ws);
-    XLSX.utils.book_append_sheet(wb, ws, cfg.label.substring(0, 31));
-  }
+    XLSX.utils.book_append_sheet(wb, ws, yearLabel + ' ' + year);
+  });
 
   XLSX.writeFile(wb, cfg.outputFile);
   toast('success', 'Downloaded: ' + cfg.outputFile);
@@ -1778,7 +1918,7 @@ function downloadSection(section) {
 function styleSheet(ws) {
   // Add column widths
   const wscols = [
-    { wch: 16 }, { wch: 38 }, { wch: 18 }, { wch: 20 }, { wch: 22 }
+    { wch: 16 }, { wch: 38 }, { wch: 28 }, { wch: 18 }, { wch: 20 }, { wch: 22 }
   ];
   ws['!cols'] = wscols;
 }
@@ -1794,61 +1934,35 @@ function downloadPendingSection(section) {
     return;
   }
 
-  // Flatten rows (newJoiner is split by year)
-  let allRows;
-  if (section === 'newJoiner') {
-    allRows = [...(result['2024'] || []), ...(result['2025'] || []), ...(result['2026'] || [])];
-  } else {
-    allRows = result;
-  }
+  // All sections now store results as year-split objects
+  const allRows = [...(result['2024'] || []), ...(result['2025'] || []), ...(result['2026'] || [])];
 
   if (!allRows || !allRows.length) {
     toast('error', 'No data available');
     return;
   }
 
-  const filtered = allRows.filter(r => {
-    const status = String(r['Transcript Status'] || '').trim().toLowerCase();
-    return status !== 'completed';
+  const wb = XLSX.utils.book_new();
+  let totalPending = 0;
+
+  ['2024', '2025', '2026'].forEach(year => {
+    const yearRows = (result[year] || []).filter(r => norm(r['Transcript Status']) !== 'completed');
+    if (yearRows.length > 0) {
+      const ws = XLSX.utils.json_to_sheet(yearRows);
+      styleSheet(ws);
+      XLSX.utils.book_append_sheet(wb, ws, 'Pending ' + year);
+      totalPending += yearRows.length;
+    }
   });
 
-  if (!filtered.length) {
+  if (wb.SheetNames.length === 0) {
     toast('info', 'No pending users — everyone has completed!');
     return;
   }
 
-  const cleaned = filtered.map(r => ({
-    'Employee ID': r['Employee ID'],
-    'Work Email Address': r['Work Email Address'],
-    'Transcript Status': r['Transcript Status'],
-    'Training Start Date': r['Training Start Date'],
-    'Transcript Completed Date': r['Transcript Completed Date']
-  }));
-
-  const wb = XLSX.utils.book_new();
-
-  if (section === 'newJoiner') {
-    ['2024', '2025', '2026'].forEach(year => {
-      const yearRows = (result[year] || []).filter(r => norm(r['Transcript Status']) !== 'completed');
-      if (yearRows.length > 0) {
-        const ws = XLSX.utils.json_to_sheet(yearRows);
-        styleSheet(ws);
-        XLSX.utils.book_append_sheet(wb, ws, 'Pending ' + year);
-      }
-    });
-    if (wb.SheetNames.length === 0) {
-      toast('info', 'No pending users — everyone has completed!');
-      return;
-    }
-  } else {
-    const ws = XLSX.utils.json_to_sheet(cleaned);
-    styleSheet(ws);
-    XLSX.utils.book_append_sheet(wb, ws, 'Pending Users');
-  }
-
   const filename = cfg.outputFile.replace('.xlsx', '_Pending_Users.xlsx');
   XLSX.writeFile(wb, filename);
-  toast('success', `Downloaded ${cleaned.length} pending users — ${filename}`);
+  toast('success', `Downloaded ${totalPending} pending users — ${filename}`);
 }
 
 // ============================================================
@@ -1893,8 +2007,21 @@ function clearSection(section) {
     });
     document.getElementById('nj-tabs').style.display = 'none';
   } else {
-    const tbl = document.getElementById('tbl-'+section);
-    if (tbl) tbl.innerHTML = '<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload both files and click Calculate</div></div>';
+    ['2024','2025','2026'].forEach(y => {
+      const t = document.getElementById('tbl-'+section+'-'+y);
+      if (t) t.innerHTML = '<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Upload files and calculate</div></div>';
+    });
+    const yearTabsEl = document.getElementById(section+'-year-tabs');
+    if (yearTabsEl) yearTabsEl.style.display = 'none';
+    // Re-activate first tab
+    const firstTab = document.querySelector('#panel-'+section+' .sheet-tab');
+    const allTabs = document.querySelectorAll('#panel-'+section+' .sheet-tab');
+    const allContents = document.querySelectorAll('#panel-'+section+' .sheet-content');
+    allTabs.forEach(t => t.classList.remove('active'));
+    allContents.forEach(c => c.classList.remove('active'));
+    if (firstTab) firstTab.classList.add('active');
+    const firstContent = document.querySelector('#panel-'+section+' .sheet-content');
+    if (firstContent) firstContent.classList.add('active');
   }
 
   document.getElementById('btn-dl-'+section).disabled = true;
