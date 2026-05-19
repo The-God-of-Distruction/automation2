@@ -1,53 +1,58 @@
 # CyberShield Training Automation Dashboard
 
-Modern browser-based automation dashboard for processing cybersecurity training compliance data and generating year-wise Excel reports.
+Enterprise-grade browser-based dashboard for automating cybersecurity training compliance workflows and generating structured Excel reports.
+
+Source File: 
 
 ---
 
-# Features
+# Capabilities
 
-* Multi-section training processing
-* Excel upload + parsing
-* Dynamic header detection
-* Employee ID / Email matching
-* Auto status calculation
-* Duplicate handling
-* Year-wise output split (2024 / 2025 / 2026)
-* Pending user extraction
-* Excel export generation
-* Fully client-side processing
+* Multi-module training processing
+* Drag & drop Excel ingestion
+* Dynamic Excel header detection
+* Employee correlation via:
 
----
-
-# Supported Modules
-
-| Module          | Base File | Tool Output |
-| --------------- | --------- | ----------- |
-| App Security    | ❌         | ✅           |
-| Growth Group    | ❌         | ✅           |
-| New Joiner      | ❌         | ✅           |
-| BSC             | ✅         | ✅           |
-| Phishing Normal | ✅         | ✅           |
-| Band 4+         | ✅         | ✅           |
+  * Employee ID
+  * Work Email
+* Automated transcript status resolution
+* Duplicate elimination
+* Year-wise report segregation
+* Pending-user extraction
+* Multi-sheet Excel export
+* Real-time KPI dashboard
 
 ---
 
-# Core Processing Logic
+# Supported Training Modules
 
-The dashboard:
-
-1. Reads uploaded Excel files
-2. Detects headers dynamically
-3. Matches users via:
-   * Employee ID
-   * Email Address
-4. Determines training status
-5. Splits output by year
-6. Generates downloadable reports
+| Module                      | Base File | Tool Output |
+| --------------------------- | --------- | ----------- |
+| Application Security        | ❌         | ✅           |
+| Growth Group                | ❌         | ✅           |
+| New Joiner                  | ❌         | ✅           |
+| BSC                         | ✅         | ✅           |
+| Phishing Normal             | ✅         | ✅           |
+| Band 4+ / Senior Management | ✅         | ✅           |
 
 ---
 
-# Output Columns
+# Core Processing Engine
+
+The dashboard performs:
+
+1. Excel parsing via SheetJS
+2. Dynamic schema discovery
+3. User matching & normalization
+4. Transcript status calculation
+5. Year-based segmentation
+6. Excel report generation
+
+---
+
+# Output Structure
+
+Generated reports contain:
 
 * Employee ID
 * Work Email Address
@@ -58,43 +63,56 @@ The dashboard:
 
 ---
 
-# Status Rules
+# Processing Rules
 
-| Condition              | Status          |
-| ---------------------- | --------------- |
-| Completed date exists  | Completed       |
-| "In Progress" detected | In Progress     |
-| Empty status           | Not Started     |
-| Otherwise              | Original Status |
+| Condition                     | Result                     |
+| ----------------------------- | -------------------------- |
+| Completed date exists         | Completed                  |
+| Status contains "In Progress" | In Progress                |
+| Empty status                  | Not Started                |
+| Otherwise                     | Original transcript status |
 
 ---
 
-# Usage
+# Architecture
+
+* Pure client-side application
+* No backend dependency
+* No database dependency
+* No external storage
+* Local browser-based processing
+
+---
+
+# Workflow
 
 ## 1. Open Dashboard
 
-```text
+```
 Dashboard.html
 ```
 
----
+## 2. Select Module
 
-## 2. Upload Files
+* App Security
+* Growth
+* New Joiner
+* BSC
+* Phishing Normal
+* Band 4+
+
+## 3. Upload Files
 
 Depending on module:
 
 * Base Userbase Excel
 * Tool Output Excel
 
----
+## 4. Set Assignment Date
 
-## 3. Set Assignment Date
+Select assignment date from the UI.
 
-Select the assignment date from the date picker.
-
----
-
-## 4. Process
+## 5. Run Processing
 
 Click:
 
@@ -102,24 +120,25 @@ Click:
 Calculate
 ```
 
----
+## 6. Export Reports
 
-## 5. Export
+Available exports:
 
-Available downloads:
-
-* Full Output Excel
-* Pending Users Excel
+* Full Output Workbook
+* Pending Users Workbook
 
 ---
 
-# Architecture
+# Key Features
 
-* Fully client-side
-* No backend
-* No database
-* No external storage
-* Local browser processing only
+* Modern enterprise UI
+* Real-time KPI metrics
+* Year-wise tab segregation
+* Automated progress tracking
+* Dynamic upload validation
+* Toast notification system
+* Responsive layout
+* High-volume Excel handling
 
 ---
 
@@ -132,17 +151,17 @@ Recommended:
 
 ---
 
-# Notes
+# Security Model
 
-* Supports drag & drop uploads
-* Handles duplicate users automatically
-* Optimized for ABI training workflows
-* Year-based report segregation included
+* Fully offline-compatible
+* No server-side processing
+* No outbound data transfer
+* Local file-only operations
 
 ---
 
 # Main File
 
-```text
+```
 Dashboard.html
 ```
